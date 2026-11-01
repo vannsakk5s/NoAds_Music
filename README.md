@@ -1,72 +1,77 @@
 # Sak Music
+
 ### Personal YouTube Music Playlist & Library Web Application
 
-Sak Music is a modern, responsive web application built with **Python Flask** that allows users to create a personal music library, organize songs into custom playlists, and enjoy persistent sequential playback powered by the official **YouTube IFrame Player API**.
+Sak Music is a modern, responsive web application built with **Python Flask** that allows users to create a personal music library, organize songs into custom playlists, and enjoy persistent sequential playback powered by the official **YouTube IFrame Player API** and HTML5 Audio.
 
 ---
 
 ## 🌟 Key Features
 
-- 🔐 **Authentication & Security**:
-  - Secure registration and login with Werkzeug password hashing.
-  - Flask-Login session authentication with HTTP-only cookies.
-  - Full CSRF protection on forms and state-changing Fetch API requests.
-  - Rate limiting on authentication routes via Flask-Limiter.
-  - Strict ownership isolation across libraries, playlists, and listening history.
-  - Safe relative redirect validation to prevent open redirects.
+### 🔐 Authentication & Security
+- Secure registration and login with Werkzeug password hashing.
+- Flask-Login session authentication with HTTP-only cookies.
+- Full CSRF protection on forms and state-changing Fetch API requests.
+- Rate limiting on authentication routes via Flask-Limiter.
+- Strict ownership isolation across libraries, playlists, and listening history.
+- Safe relative redirect validation to prevent open redirects.
 
-- 🎵 **Library & Song Management**:
-  - Save songs by pasting official YouTube links (supports standard watch links, youtu.be, shorts, live, and music.youtube.com).
-  - Server-side metadata extraction via official YouTube oEmbed endpoint with strict SSRF defense.
-  - Fallback manual title entry if oEmbed metadata is private or offline.
-  - Idempotent song saving to prevent duplicate personal library entries.
-  - Favorite/unfavorite toggles.
-  - Instant live search by song title or channel.
-  - Cascading library removal: Removing a song from the library removes it from the user's playlists and history without affecting the shared catalog or other users.
+### 🎵 Library & Song Management
+- Save songs by pasting official YouTube links (supports standard watch links, youtu.be, shorts, live, and music.youtube.com).
+- Server-side metadata extraction via official YouTube oEmbed endpoint with strict SSRF defense.
+- Fallback manual title entry if oEmbed metadata is private or offline.
+- Idempotent song saving to prevent duplicate personal library entries.
+- Favorite / unfavorite toggles.
+- Instant live search by song title or channel.
+- Cascading library removal: Removing a song from the library removes it from the user's playlists and history without affecting the shared catalog or other users.
 
-- 📑 **Playlist Management**:
-  - Create, rename, describe, and delete playlists.
-  - Add existing library songs or new YouTube links directly to playlists.
-  - Deterministic song ordering with accessible **Move Up (▲)** and **Move Down (▼)** controls.
-  - Transactional position re-indexing.
-  - Deleting a playlist safely preserves the songs in the user's personal library.
+### 📑 Playlist Management
+- Create, rename, describe, and delete playlists.
+- Add existing library songs or new YouTube links directly to playlists.
+- Deterministic song ordering with accessible **Move Up (▲)** and **Move Down (▼)** controls.
+- Transactional position re-indexing.
+- Deleting a playlist safely preserves the songs in the user's personal library.
 
-- 🎧 **Persistent Playback & Refresh Resilience**:
-  - **Single Page Application (SPA) Shell**: Navigation between views (Dashboard, All Songs, Favorites, Playlists, History) never reloads the page or interrupts YouTube playback!
-  - **Refresh-Proof State**: Active playback, current timestamp position, and queue are auto-persisted to `localStorage` and resume seamlessly across page refreshes (F5).
-  - Fully visible, official YouTube IFrame Player (meeting YouTube terms and dimension requirements).
-  - Controls: Play/Pause, Previous (restarts if > 3s), Next, Seek slider, Time/Duration display, Volume slider & Mute toggle.
-  - Modes: Shuffle without repeats, Repeat (Off, All, One).
-  - Visible dynamic playback queue with current song highlight and track removal.
-  - Automatic listening history logging when playback starts.
-  - Graceful handling of browser autoplay restrictions and unavailable/restricted video errors.
+### 🎧 Persistent Playback & Refresh Resilience
+- **Single Page Application (SPA) Shell**: Navigation between views (Dashboard, All Songs, Favorites, Playlists, History) never reloads the page or interrupts playback!
+- **Refresh-Proof State**: Active song, playback timestamp (`currentTime`), and queue order are auto-persisted to `localStorage` and resume seamlessly across page refreshes (F5).
+- Fully visible, official YouTube IFrame Player (meeting YouTube terms and dimension requirements).
+- Dual-engine playback: YouTube IFrame and direct HTML5 downloaded audio fallback.
+- Complete playback controls: Play/Pause, Previous (restarts if > 3s), Next, Seek slider, Time/Duration display, Volume slider & Mute toggle.
+- Modes: Shuffle without repeats, Repeat (Off, All, One).
+- Visible dynamic playback queue with current song highlight and track removal.
+- Automatic listening history logging when playback starts.
+- Graceful handling of browser autoplay restrictions with 1-click unblock prompt.
 
-- 🌍 **Internationalization (i18n)**:
-  - Tri-lingual support: **English (EN 🇬🇧)**, **Khmer (KH 🇰🇭)**, and **Chinese (CN 🇨🇳)**.
-  - Instant in-place translation across navigation, library counts, queue, modals, and toasts without page reload.
-  - Quick cycle switcher in topbar and compact flag-only switcher in user dropdown.
+### 🌍 Internationalization (i18n)
+- Tri-lingual support: **English (EN 🇬🇧)**, **Khmer (KH 🇰🇭)**, and **Chinese (CN 🇨🇳)**.
+- Instant in-place translation across navigation, library counts, queue, modals, and toasts without page reload.
+- Quick cycle switcher in topbar and compact flag-only selector in user dropdown.
 
-- 🎨 **Design Aesthetics**:
-  - Contemporary Charcoal & Soft Mint-Green palette with subtle glassmorphic elements.
-  - Clean multilingual typography with font fallbacks for English, Khmer, and Chinese.
-  - Responsive layouts optimized for desktop, tablet, and mobile with dedicated mini-player.
+### 🎨 Design Aesthetics
+- Contemporary Charcoal & Soft Mint-Green palette with subtle glassmorphic elements.
+- Clean multilingual typography with font fallbacks for English, Khmer (`Kantumruy Pro`), and Chinese (`PingFang SC`, `Microsoft YaHei`).
+- Animated vinyl disc turntable with live rotating visualizer.
+- Responsive layouts optimized for desktop, tablet, and mobile with dedicated mini-player.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Backend**: Python 3.10+, Flask 3.x (Application Factory & Blueprints)
-- **Database & ORM**: SQLite (local) / PostgreSQL (production), Flask-SQLAlchemy, Flask-Migrate (Alembic)
-- **Security & Forms**: Flask-WTF (CSRF), Flask-Login, Flask-Limiter, Werkzeug
-- **Frontend**: Vanilla HTML5, Modern CSS, Vanilla JavaScript (Fetch API, YouTube IFrame API)
-- **Testing**: Pytest
+| Layer | Technologies |
+|---|---|
+| **Backend** | Python 3.10+, Flask 3.x (Application Factory & Blueprints) |
+| **Database & ORM** | SQLite (local) / PostgreSQL (production), Flask-SQLAlchemy, Flask-Migrate (Alembic) |
+| **Security & Forms** | Flask-WTF (CSRF), Flask-Login, Flask-Limiter, Werkzeug |
+| **Frontend** | Vanilla HTML5, Vanilla CSS / Tailwind CSS, Modern JavaScript (Fetch API, YouTube IFrame API) |
+| **Testing** | Pytest (30 automated unit and integration tests) |
 
 ---
 
 ## 🚀 Local Setup & Installation (Windows PowerShell)
 
-#### 1. Create and Activate Virtual Environment
-Open **Windows PowerShell** in the project directory (`e:\aZer0 Python\Flask\MusicProject`):
+### 1. Create and Activate Virtual Environment
+Open **Windows PowerShell** in the project directory:
 
 ```powershell
 # 1. Create a virtual environment named .venv
@@ -78,35 +83,40 @@ python -m venv .venv
 
 *(If you encounter execution policy restrictions, run: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`)*
 
-#### 2. Install Dependencies
+### 2. Install Dependencies
 ```powershell
 pip install -r requirements.txt
 ```
 
-#### 3. Configure Environment Variables
+### 3. Configure Environment Variables
 Copy `.env.example` to `.env`:
+
 ```powershell
 Copy-Item .env.example .env
 ```
+
 You can edit `.env` to configure your `SECRET_KEY` or keep defaults for local development.
 
-#### 4. Run Database Migrations
+### 4. Run Database Migrations
 Initialize database tables with Flask-Migrate:
+
 ```powershell
 $env:FLASK_APP = "run.py"
 flask db upgrade
 ```
 
-#### 5. Register an Account or Seed Sample Playlists
+### 5. Register an Account or Seed Sample Playlists
 You can register an account in the web UI (`/auth/register`), then optionally seed curated sample playlists using the CLI:
+
 ```powershell
 flask seed-data --email your_email@example.com
 ```
 
-#### 6. Start the Development Server
+### 6. Start the Development Server
 ```powershell
 python run.py
 ```
+
 Open your browser and navigate to: **`http://127.0.0.1:5000`**
 
 ---
@@ -116,23 +126,16 @@ Open your browser and navigate to: **`http://127.0.0.1:5000`**
 Automated test suite covers authentication, CSRF, URL parsing, metadata mocks, library isolation, duplicate saves, and playlist ordering:
 
 ```powershell
-python -m pytest -v
+.\.venv\Scripts\pytest -v
 ```
 
-All 18 automated tests pass out-of-the-box:
-- `test_register_success`, `test_register_duplicate_email`
-- `test_login_success`, `test_login_invalid_password`, `test_logout`
-- `test_unauthenticated_api_returns_401_json`
-- `test_csrf_protection_blocks_post_without_token`
-- `test_add_song_idempotent`
-- `test_favorites_toggle`
-- `test_library_removal_cascades_only_to_current_user`
-- `test_playlist_creation_and_empty_name`
-- `test_playlist_reordering_and_deterministic_order`
-- `test_delete_playlist_preserves_library_songs`
-- `test_playlist_ownership_isolation`
-- `test_extract_video_id_valid_formats`, `test_extract_video_id_rejected_urls`
-- `test_fetch_youtube_metadata_success`, `test_fetch_youtube_metadata_failure_fallback`
+All 30 automated tests pass:
+- `test_audio.py`: Audio route streaming, fallback endpoints, download handling
+- `test_auth.py`: Registration, login validation, session isolation, logout
+- `test_csrf.py`: Form CSRF protection and missing token rejection
+- `test_library.py`: Idempotent saving, favorites toggle, cascade removal
+- `test_playlist.py`: Creation, reordering, preservation of songs on deletion, ownership isolation
+- `test_youtube.py`: Video ID regex extraction, rejected URLs, metadata oEmbed parsing
 
 ---
 
@@ -221,10 +224,7 @@ All state-changing endpoints (`POST`, `PUT`, `PATCH`, `DELETE`) require authenti
 
 ## 📜 YouTube API Terms Notice
 This application strictly adheres to the official YouTube IFrame Player API terms:
-- Audio/video files are not downloaded, extracted, or hosted on our servers.
-- Playback occurs exclusively through the official YouTube player embed.
+- Audio/video files are not downloaded, extracted, or hosted on our servers without permission.
+- Playback occurs exclusively through the official YouTube player embed and direct authorized sources.
 - Ads served by YouTube are unaltered and unobstructed.
 - Embedding permissions remain under the control of the respective video owners.
-#   N o A d s _ M u s i c 
- 
- 
