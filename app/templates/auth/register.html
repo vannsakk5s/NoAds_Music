@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Sak Music{% endblock %}
+
+{% block content %}
+<div class="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 relative overflow-hidden">
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-mint-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="w-full max-w-md bg-dark-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 lg:p-10 shadow-glass space-y-6 relative z-10">
+    <div class="text-center space-y-2">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-mint-500 via-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-glow-mint mx-auto mb-4">
+        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3.5" fill="currentColor"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="font-display font-extrabold text-2xl text-white tracking-tight">Sak Music</h1>
+      <p class="text-xs text-slate-400">Create your personal library</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}" class="space-y-4" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="space-y-1.5">
+        <label for="name" class="text-xs font-semibold text-slate-300 block">Full Name</label>
+        {{ form.name(class="w-full bg-dark-850/80 border " + ("border-rose-500 focus:border-rose-500" if form.name.errors else "border-white/10 focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20") + " rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all", id="name", placeholder="John Doe", autocomplete="name", required=True) }}
+        {% for error in form.name.errors %}
+          <div class="text-[11px] text-rose-400 mt-1 font-medium">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="email" class="text-xs font-semibold text-slate-300 block">Email Address</label>
+        {{ form.email(class="w-full bg-dark-850/80 border " + ("border-rose-500 focus:border-rose-500" if form.email.errors else "border-white/10 focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20") + " rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all", id="email", placeholder="you@example.com", autocomplete="email", required=True) }}
+        {% for error in form.email.errors %}
+          <div class="text-[11px] text-rose-400 mt-1 font-medium">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="password" class="text-xs font-semibold text-slate-300 block">Password (min. 6 chars)</label>
+        {{ form.password(class="w-full bg-dark-850/80 border " + ("border-rose-500 focus:border-rose-500" if form.password.errors else "border-white/10 focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20") + " rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all", id="password", placeholder="••••••••", autocomplete="new-password", required=True) }}
+        {% for error in form.password.errors %}
+          <div class="text-[11px] text-rose-400 mt-1 font-medium">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="confirm_password" class="text-xs font-semibold text-slate-300 block">Confirm Password</label>
+        {{ form.confirm_password(class="w-full bg-dark-850/80 border " + ("border-rose-500 focus:border-rose-500" if form.confirm_password.errors else "border-white/10 focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20") + " rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all", id="confirm_password", placeholder="••••••••", autocomplete="new-password", required=True) }}
+        {% for error in form.confirm_password.errors %}
+          <div class="text-[11px] text-rose-400 mt-1 font-medium">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="w-full bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold py-3 px-4 rounded-xl text-sm shadow-glow-mint-sm transition-all hover:scale-[1.01] active:scale-[0.99] mt-2">
+        Create Account
+      </button>
+    </form>
+
+    <div class="pt-4 border-t border-white/5 text-center space-y-1">
+      <p class="text-xs text-slate-400">Already have an account?</p>
+      <a href="{{ url_for('auth.login') }}" class="text-xs font-semibold text-mint-400 hover:text-mint-300 hover:underline inline-block">Log in here</a>
+    </div>
+
+    <div class="text-center pt-2">
+      <small class="text-[10px] text-slate-600 block leading-tight">By registering, you agree that songs are streamed via the official YouTube IFrame Player.</small>
+    </div>
+  </div>
+</div>
+{% endblock %}

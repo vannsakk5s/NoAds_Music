@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Log In - Sak Music{% endblock %}
+
+{% block content %}
+<div class="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 relative overflow-hidden">
+  <!-- Atmospheric background glows -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-mint-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="w-full max-w-md bg-dark-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 lg:p-10 shadow-glass space-y-6 relative z-10">
+    <div class="text-center space-y-2">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-mint-500 via-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-glow-mint mx-auto mb-4">
+        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3.5" fill="currentColor"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="font-display font-extrabold text-2xl text-white tracking-tight">Sak Music</h1>
+      <p class="text-xs text-slate-400">Your personal YouTube music library</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" class="space-y-4" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="space-y-1.5">
+        <label for="email" class="text-xs font-semibold text-slate-300 block">Email Address</label>
+        {{ form.email(class="w-full bg-dark-850/80 border " + ("border-rose-500 focus:border-rose-500" if form.email.errors else "border-white/10 focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20") + " rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all", id="email", placeholder="you@example.com", autocomplete="email", required=True) }}
+        {% for error in form.email.errors %}
+          <div class="text-[11px] text-rose-400 mt-1 font-medium">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label for="password" class="text-xs font-semibold text-slate-300 block">Password</label>
+          <a href="{{ url_for('auth.forgot_password') }}" class="text-xs font-medium text-mint-400 hover:text-mint-300 hover:underline transition-colors">Forgot password?</a>
+        </div>
+        {{ form.password(class="w-full bg-dark-850/80 border " + ("border-rose-500 focus:border-rose-500" if form.password.errors else "border-white/10 focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20") + " rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all", id="password", placeholder="••••••••", autocomplete="current-password", required=True) }}
+        {% for error in form.password.errors %}
+          <div class="text-[11px] text-rose-400 mt-1 font-medium">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        {{ form.remember(class="w-4 h-4 rounded bg-dark-850 border-white/20 text-mint-500 focus:ring-mint-500/30 accent-mint-500", id="remember") }}
+        <label for="remember" class="text-xs text-slate-400 cursor-pointer select-none">Keep me signed in</label>
+      </div>
+
+      <button type="submit" class="w-full bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold py-3 px-4 rounded-xl text-sm shadow-glow-mint-sm transition-all hover:scale-[1.01] active:scale-[0.99] mt-2">
+        Log In
+      </button>
+    </form>
+
+    <div class="pt-4 border-t border-white/5 text-center space-y-1">
+      <p class="text-xs text-slate-400">Don't have an account yet?</p>
+      <a href="{{ url_for('auth.register') }}" class="text-xs font-semibold text-mint-400 hover:text-mint-300 hover:underline inline-block">Create an account</a>
+    </div>
+
+    <div class="text-center pt-2">
+      <small class="text-[10px] text-slate-600 block leading-tight">Powered by YouTube IFrame API. Videos and ads are served directly by YouTube.</small>
+    </div>
+  </div>
+</div>
+{% endblock %}

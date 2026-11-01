@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Sak Music{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card text-center">
+    <div class="brand-badge mb-3">
+      <span style="font-size: 2rem; font-weight: bold; color: #ef4444;">500</span>
+    </div>
+    <h1 class="auth-title">Server Error</h1>
+    <p class="text-muted mt-2">Something unexpected went wrong on our end. Please try again shortly.</p>
+    <div class="mt-4">
+      <a href="{{ url_for('main.index') }}" class="btn btn-primary">Return Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

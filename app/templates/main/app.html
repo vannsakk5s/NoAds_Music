@@ -1,0 +1,1530 @@
+{% extends "base.html" %}
+
+{% block title %}Sak Music • Dashboard & Player{% endblock %}
+
+{% block content %}
+<div
+  class="h-screen w-screen overflow-hidden grid grid-cols-1 md:grid-cols-[260px_1fr] xl:grid-cols-[260px_1fr_340px] grid-rows-[1fr] md:grid-rows-[1fr_88px] bg-dark-950"
+  id="app-layout">
+
+  <!-- Mobile Drawer Backdrop Overlay -->
+  <div id="mobile-drawer-backdrop"
+    class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[45] opacity-0 pointer-events-none transition-opacity duration-300">
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- 1. LEFT SIDEBAR                                      -->
+  <!-- ==================================================== -->
+  <aside
+    class="app-sidebar fixed md:static inset-y-0 left-0 z-50 w-72 md:w-auto bg-dark-900/95 md:bg-dark-900/80 backdrop-blur-2xl border-r border-white/5 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0"
+    id="app-sidebar" aria-label="Main Navigation">
+
+    <!-- Sidebar Header -->
+    <div class="p-5 flex items-center justify-between border-b border-white/5">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-mint-500 via-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-glow-mint-sm">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-display font-bold text-lg text-white tracking-tight block">Sak Music</span>
+          <span class="text-[11px] font-medium text-mint-400 block -mt-1 tracking-wider uppercase">Library &
+            Player</span>
+        </div>
+      </div>
+      <button class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5" id="sidebar-close-btn"
+        aria-label="Close sidebar">✕</button>
+    </div>
+
+    <!-- Main Navigation Menu -->
+    <nav class="sidebar-nav flex-1 px-3 py-5 overflow-y-auto space-y-6">
+      <div>
+        <div class="px-3 pb-2 text-[11px] font-semibold tracking-wider text-slate-500 uppercase">Library</div>
+        <ul class="space-y-1">
+          <li>
+            <button
+              class="nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all"
+              data-view="dashboard" id="nav-dashboard">
+              <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              <span data-i18n="nav_home">Home</span>
+            </button>
+          </li>
+          <li>
+            <button
+              class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all"
+              data-view="all-songs" id="nav-all-songs">
+              <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+              <span data-i18n="nav_all_songs">All Songs</span>
+            </button>
+          </li>
+          <li>
+            <button
+              class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all"
+              data-view="favorites" id="nav-favorites">
+              <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span data-i18n="nav_favorites">Favorites</span>
+            </button>
+          </li>
+          <li>
+            <button
+              class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all"
+              data-view="history" id="nav-history">
+              <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span data-i18n="nav_recently_played">Recently Played</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Playlists Section -->
+      <div>
+        <div class="px-3 pb-2 flex items-center justify-between">
+          <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase" data-i18n="nav_playlists">Playlists</span>
+          <button
+            class="w-6 h-6 rounded-lg bg-white/5 hover:bg-mint-500 hover:text-dark-950 text-slate-300 text-xs font-bold flex items-center justify-center transition-all border border-white/5 hover:border-mint-500 shadow-sm"
+            id="btn-create-playlist-trigger" title="Create Playlist" aria-label="Create Playlist">+</button>
+        </div>
+        <div class="max-h-56 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+          <ul class="space-y-1" id="sidebar-playlists-list">
+            {% for pl in playlists %}
+            <li>
+              <button
+                class="nav-item playlist-nav-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all group"
+                data-view="playlist-detail" data-playlist-id="{{ pl.id }}">
+                <div class="flex items-center gap-2.5 truncate min-w-0">
+                  <div
+                    class="playlist-icon-box w-6 h-6 rounded-lg bg-dark-800/80 group-hover:bg-dark-750 flex items-center justify-center text-mint-400 flex-shrink-0 transition-colors border border-white/5">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 18V5l12-2v13"></path>
+                      <circle cx="6" cy="18" r="3"></circle>
+                      <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                  </div>
+                  <span class="playlist-name-text truncate font-medium text-slate-300 group-hover:text-white">{{ pl.name
+                    }}</span>
+                </div>
+                <span
+                  class="badge-count ml-2 text-[10px] font-mono px-2 py-0.5 rounded-full bg-dark-800 text-slate-400 group-hover:bg-dark-750 flex-shrink-0 border border-white/5">
+                  {{ pl.playlist_songs|length }}
+                </span>
+              </button>
+            </li>
+            {% else %}
+            <li class="empty-nav-text px-3 py-2 text-xs italic text-slate-500" id="sidebar-playlists-empty">No playlists
+              yet</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sidebar User Footer -->
+    <div class="p-3 border-t border-white/5 bg-black/20 relative" id="sidebar-user-footer">
+
+      <!-- User Popup Dropdown Menu (Floats above user profile card) -->
+      <div id="sidebar-user-menu"
+        class="hidden absolute bottom-full left-3 right-3 mb-2 p-1.5 bg-dark-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-50 transition-all duration-200"
+        role="menu" aria-label="User menu">
+        <div class="px-3 py-2 border-b border-white/5 mb-1.5 flex items-center gap-2.5">
+          <div
+            class="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shadow-sm flex-shrink-0">
+            {{ user.name[0]|upper }}
+          </div>
+          <div class="overflow-hidden min-w-0">
+            <div class="text-xs font-semibold text-slate-100 truncate leading-tight">{{ user.name }}</div>
+            <div class="text-[11px] text-slate-400 truncate leading-tight">{{ user.email }}</div>
+          </div>
+        </div>
+
+        <!-- Theme Mode Toggle Selector in Menu -->
+        <div class="px-2.5 py-2 mb-1 flex items-center justify-between border-b border-white/5 text-xs font-medium">
+          <span class="text-slate-400 flex items-center gap-1.5 text-[11px]">
+            <svg class="w-3.5 h-3.5 text-mint-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+            </svg>
+            <span data-i18n="theme">Theme</span>
+          </span>
+          <div class="flex items-center gap-1 bg-black/20 p-0.5 rounded-lg border border-white/10" id="theme-toggle-group">
+            <button type="button" class="theme-btn px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5 transition-all" data-theme="dark" id="btn-theme-dark">
+              <svg class="w-3 h-3 flex-shrink-0 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              <span data-i18n="theme_dark">Dark</span>
+            </button>
+            <button type="button" class="theme-btn px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5 transition-all" data-theme="light" id="btn-theme-light">
+              <svg class="w-3 h-3 flex-shrink-0 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <span data-i18n="theme_light">Light</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Language Selector in Menu -->
+        <div class="px-2.5 py-2 mb-1.5 flex items-center justify-between border-b border-white/5 text-xs font-medium">
+          <span class="text-slate-400 flex items-center gap-1.5 text-[11px]">
+            <svg class="w-3.5 h-3.5 text-mint-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span data-i18n="language">Language</span>
+          </span>
+          <div class="flex items-center gap-1 bg-black/20 p-0.5 rounded-lg border border-white/10" id="lang-toggle-group">
+            <button type="button" class="lang-btn px-2 py-1.5 rounded-md flex items-center justify-center transition-all" data-lang="en" id="btn-lang-en" title="English" aria-label="English">
+              <svg class="w-4 h-2.5 rounded-[2px] overflow-hidden flex-shrink-0 shadow-sm pointer-events-none" viewBox="0 0 60 30" aria-hidden="true">
+                <clipPath id="uk-flag-menu"><rect width="60" height="30"/></clipPath>
+                <g clip-path="url(#uk-flag-menu)">
+                  <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+                  <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+                  <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4"/>
+                  <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+                  <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+                </g>
+              </svg>
+            </button>
+            <button type="button" class="lang-btn px-2 py-1.5 rounded-md flex items-center justify-center transition-all" data-lang="km" id="btn-lang-km" title="ភាសាខ្មែរ" aria-label="Khmer">
+              <svg class="w-4 h-2.5 rounded-[2px] overflow-hidden flex-shrink-0 shadow-sm pointer-events-none" viewBox="0 0 60 30" aria-hidden="true">
+                <rect width="60" height="30" fill="#032EA1"/>
+                <rect y="7.5" width="60" height="15" fill="#E00025"/>
+                <g fill="#FFFFFF">
+                  <polygon points="30,8.5 28,12 32,12"/>
+                  <rect x="28.5" y="12" width="3" height="3"/>
+                  <polygon points="23,10.5 21.5,13 24.5,13"/>
+                  <rect x="22" y="13" width="2" height="2"/>
+                  <polygon points="37,10.5 35.5,13 38.5,13"/>
+                  <rect x="36" y="13" width="2" height="2"/>
+                  <rect x="19" y="15" width="22" height="2"/>
+                  <rect x="17" y="17" width="26" height="2"/>
+                  <rect x="15" y="19" width="30" height="2.5"/>
+                </g>
+              </svg>
+            </button>
+            <button type="button" class="lang-btn px-2 py-1.5 rounded-md flex items-center justify-center transition-all" data-lang="zh" id="btn-lang-zh" title="中文" aria-label="Chinese">
+              <svg class="w-4 h-2.5 rounded-[2px] overflow-hidden flex-shrink-0 shadow-sm pointer-events-none" viewBox="0 0 60 30" aria-hidden="true">
+                <rect width="60" height="30" fill="#DE2910"/>
+                <defs>
+                  <polygon id="cn-star-menu" points="0,-1 0.2245,-0.309 0.9511,-0.309 0.3633,0.118 0.5878,0.809 0,0.382 -0.5878,0.809 -0.3633,0.118 -0.9511,-0.309 -0.2245,-0.309" fill="#FFDE00"/>
+                </defs>
+                <use href="#cn-star-menu" transform="translate(10, 7.5) scale(4.5)"/>
+                <use href="#cn-star-menu" transform="translate(20, 3) rotate(114) scale(1.5)"/>
+                <use href="#cn-star-menu" transform="translate(24, 6) rotate(140) scale(1.5)"/>
+                <use href="#cn-star-menu" transform="translate(24, 10.5) rotate(170) scale(1.5)"/>
+                <use href="#cn-star-menu" transform="translate(20, 13.5) rotate(196) scale(1.5)"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <form action="{{ url_for('auth.logout') }}" method="POST" class="logout-form m-0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit"
+            class="w-full py-2 px-3 rounded-xl border border-rose-500/20 hover:border-rose-500/50 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span data-i18n="logout">Log Out</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- User Card Trigger -->
+      <button type="button" id="sidebar-user-trigger"
+        class="w-full p-2 rounded-xl flex items-center gap-3 text-left hover:bg-white/5 active:bg-white/10 transition-all group focus:outline-none focus:ring-1 focus:ring-mint-500/30 cursor-pointer"
+        aria-haspopup="true" aria-expanded="false" aria-label="User account menu">
+        <div
+          class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-sm flex items-center justify-center shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+          {{ user.name[0]|upper }}
+        </div>
+        <div class="overflow-hidden flex-1 min-w-0">
+          <div class="text-sm font-semibold text-slate-100 truncate group-hover:text-white transition-colors">{{
+            user.name }}</div>
+          <div class="text-xs text-slate-400 truncate">{{ user.email }}</div>
+        </div>
+        <div class="text-slate-500 group-hover:text-slate-300 transition-colors flex-shrink-0">
+          <svg class="w-4 h-4 transition-transform duration-200" id="sidebar-user-chevron-icon" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </div>
+      </button>
+
+    </div>
+  </aside>
+
+  <!-- ==================================================== -->
+  <!-- 2. MAIN CENTER CONTENT AREA                          -->
+  <!-- ==================================================== -->
+  <main class="app-main flex flex-col overflow-hidden relative bg-dark-950/60" id="app-main">
+
+    <!-- Top Header Bar -->
+    <header
+      class="app-topbar h-14 sm:h-16 px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4 border-b border-white/5 bg-dark-900/60 backdrop-blur-xl sticky top-0 z-20">
+      <div class="flex items-center gap-2 sm:gap-3 flex-1">
+        <button class="md:hidden p-1.5 sm:p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5"
+          id="mobile-sidebar-toggle" aria-label="Open menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Search Input -->
+        <div class="search-box relative w-full max-w-md">
+          <svg class="search-icon w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="global-search-input" placeholder="Search songs..." data-i18n-placeholder="search_placeholder"
+            class="w-full bg-dark-850/80 hover:bg-dark-850 border border-white/10 rounded-full pl-9 sm:pl-10 pr-8 sm:pr-9 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20 transition-all"
+            aria-label="Search library">
+          <button
+            class="search-clear-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-base leading-none"
+            id="search-clear-btn" aria-label="Clear search" style="display: none;">&times;</button>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="topbar-actions flex items-center gap-2 sm:gap-3">
+        <button
+          class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-glow-mint-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex-shrink-0"
+          id="btn-add-song-modal">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="add_song">Add Song</span>
+          <span class="sm:hidden font-bold" data-i18n="add_short">Add</span>
+        </button>
+
+        <!-- Theme Toggle Button (Topbar) -->
+        <button
+          type="button"
+          class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 border border-white/10 transition-all flex items-center justify-center cursor-pointer flex-shrink-0"
+          id="btn-topbar-theme-toggle"
+          title="Toggle Dark / Light Mode"
+          aria-label="Toggle theme">
+          <svg class="w-4 h-4 text-amber-300 theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="w-4 h-4 text-slate-700 theme-icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Language Toggle Button (Topbar) -->
+        <button
+          type="button"
+          class="px-2.5 py-1.5 text-slate-300 hover:text-white rounded-xl hover:bg-white/5 border border-white/10 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer flex-shrink-0"
+          id="btn-topbar-lang-toggle"
+          title="Toggle Language (EN / KH / CN)"
+          aria-label="Toggle language">
+          <span id="topbar-lang-flag" class="pointer-events-none flex items-center">
+            <svg class="w-3.5 h-2.5 rounded-[2px] overflow-hidden flex-shrink-0 shadow-sm pointer-events-none" viewBox="0 0 60 30" aria-hidden="true">
+              <rect width="60" height="30" fill="#032EA1"/>
+              <rect y="7.5" width="60" height="15" fill="#E00025"/>
+              <g fill="#FFFFFF">
+                <polygon points="30,8.5 28,12 32,12"/>
+                <rect x="28.5" y="12" width="3" height="3"/>
+                <polygon points="23,10.5 21.5,13 24.5,13"/>
+                <rect x="22" y="13" width="2" height="2"/>
+                <polygon points="37,10.5 35.5,13 38.5,13"/>
+                <rect x="36" y="13" width="2" height="2"/>
+                <rect x="19" y="15" width="22" height="2"/>
+                <rect x="17" y="17" width="26" height="2"/>
+                <rect x="15" y="19" width="30" height="2.5"/>
+              </g>
+            </svg>
+          </span>
+          <span id="topbar-lang-text" class="text-[11px] font-bold pointer-events-none">KH</span>
+        </button>
+
+        <!-- <button class="xl:hidden p-1.5 sm:p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 flex-shrink-0"
+          id="mobile-queue-toggle" aria-label="Toggle Player Panel">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+            <line x1="7" y1="2" x2="7" y2="22"></line>
+            <line x1="17" y1="2" x2="17" y2="22"></line>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+          </svg>
+        </button> -->
+      </div>
+    </header>
+
+    <!-- Content Viewport (SPA Swapping Area) -->
+    <div class="content-viewport flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 custom-scrollbar"
+      id="content-viewport">
+
+      <!-- VIEW 1: HOME DASHBOARD -->
+      <section class="content-view active space-y-6 sm:space-y-8" id="view-dashboard">
+        <!-- Hero Banner -->
+        <div
+          class="view-hero relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 bg-gradient-to-br from-mint-500/15 via-dark-900 to-dark-850 border border-white/10 shadow-2xl">
+          <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-mint-500/10 rounded-full blur-3xl pointer-events-none">
+          </div>
+          <div class="relative z-10 max-w-xl space-y-3 sm:space-y-4">
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-mint-500/15 text-mint-400 border border-mint-500/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-mint-400 animate-pulse"></span>
+              <span data-i18n="dashboard_badge">Sak Music Dashboard</span>
+            </span>
+            <h1 class="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-white tracking-tight"><span data-i18n="welcome_back">Welcome back</span>, {{ user.name }}!</h1>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="hero_desc">Stream your YouTube catalog in an uncluttered,
+              persistent music dashboard with zero playback disruptions.</p>
+            <div class="pt-1 sm:pt-2 flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <button
+                class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-glow-mint hover:scale-[1.02] active:scale-[0.98] transition-all"
+                id="btn-hero-play-all">
+                <svg class="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-current" viewBox="0 0 24 24">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <span data-i18n="play_all_songs">Play All Songs</span>
+              </button>
+              <button
+                class="btn btn-secondary bg-dark-800/90 hover:bg-dark-750 text-slate-200 border border-white/10 font-semibold px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm transition-all"
+                id="btn-hero-add-song" data-i18n="paste_link">
+                + Paste Link
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Counter Row: 3 Compact Columns on Mobile -->
+        <div class="stats-row grid grid-cols-3 gap-2 sm:gap-4">
+          <div
+            class="stat-card p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-dark-900/70 backdrop-blur-md border border-white/5 hover:border-mint-500/30 cursor-pointer hover:-translate-y-0.5 transition-all shadow-lg text-center sm:text-left"
+            data-view-target="all-songs">
+            <div class="font-display font-bold text-xl sm:text-3xl text-mint-400" id="stat-total-songs">0</div>
+            <div class="text-[10px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 truncate sm:whitespace-normal" data-i18n="stat_library_songs">
+              Library Songs</div>
+          </div>
+          <div
+            class="stat-card p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-dark-900/70 backdrop-blur-md border border-white/5 hover:border-mint-500/30 cursor-pointer hover:-translate-y-0.5 transition-all shadow-lg text-center sm:text-left"
+            data-view-target="favorites">
+            <div class="font-display font-bold text-xl sm:text-3xl text-mint-400" id="stat-total-favorites">0</div>
+            <div class="text-[10px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 truncate sm:whitespace-normal" data-i18n="stat_favorites">
+              Favorites</div>
+          </div>
+          <div
+            class="stat-card p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-dark-900/70 backdrop-blur-md border border-white/5 hover:border-mint-500/30 cursor-pointer hover:-translate-y-0.5 transition-all shadow-lg text-center sm:text-left"
+            data-view-target="dashboard">
+            <div class="font-display font-bold text-xl sm:text-3xl text-mint-400" id="stat-total-playlists">{{
+              playlists|length }}</div>
+            <div class="text-[10px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 truncate sm:whitespace-normal" data-i18n="stat_playlists">
+              Playlists</div>
+          </div>
+        </div>
+
+        <!-- Featured Section: Playlists Grid -->
+        <div class="section-block space-y-4">
+          <div class="section-header flex items-center justify-between">
+            <h2 class="font-display font-bold text-xl text-white" data-i18n="your_playlists">Your Playlists</h2>
+            <div class="flex items-center gap-2.5">
+              <button class="px-3 py-1 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
+                id="btn-import-playlist-header-link">
+                <svg class="w-3.5 h-3.5 text-mint-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <span data-i18n="import_playlist_btn">Import by Link</span>
+              </button>
+              <button class="text-mint-400 hover:text-mint-300 text-xs font-semibold hover:underline"
+                id="btn-create-playlist-link" data-i18n="new_playlist_btn">+ New Playlist</button>
+            </div>
+          </div>
+          <div class="playlists-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+            id="dashboard-playlists-grid">
+            <!-- Dynamic playlist cards -->
+          </div>
+        </div>
+
+        <!-- Recent Songs in Library Table -->
+        <div class="section-block space-y-4">
+          <div class="section-header flex items-center justify-between">
+            <h2 class="font-display font-bold text-xl text-white" data-i18n="recently_added">Recently Added</h2>
+            <button class="text-mint-400 hover:text-mint-300 text-xs font-semibold hover:underline"
+              data-view-target="all-songs" data-i18n="view_all">View All &rarr;</button>
+          </div>
+          <div
+            class="table-container rounded-2xl border border-white/5 bg-dark-900/50 backdrop-blur-md overflow-x-auto">
+            <table class="song-table w-full text-left text-sm" id="dashboard-recent-table">
+              <thead>
+                <tr
+                  class="border-b border-white/5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase bg-dark-900/40">
+                  <th class="py-3.5 pl-5 pr-2 w-12 text-center hidden sm:table-cell" data-i18n="col_number">#</th>
+                  <th class="py-3.5 px-3" data-i18n="col_title_channel">Title & Channel</th>
+                  <th class="py-3.5 pl-3 pr-5 w-32 text-right" data-i18n="col_actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/[0.04] text-slate-300">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: ALL SONGS -->
+      <section class="content-view space-y-6" id="view-all-songs">
+        <div class="view-header flex items-center justify-between">
+          <div>
+            <h1 class="font-display font-bold text-2xl lg:text-3xl text-white" data-i18n="all_songs_title">All Songs</h1>
+            <p class="text-xs text-slate-400 mt-1" data-i18n="all_songs_subtitle">Every song saved in your personal library catalog.</p>
+          </div>
+          <button
+            class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-glow-mint-sm transition-all"
+            id="btn-play-all-library">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span data-i18n="play_all">Play All</span>
+          </button>
+        </div>
+
+        <div class="table-container rounded-2xl border border-white/5 bg-dark-900/50 backdrop-blur-md overflow-x-auto">
+          <table class="song-table w-full text-left text-sm" id="all-songs-table">
+            <thead class="hidden sm:table-header-group">
+              <tr
+                class="border-b border-white/5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase bg-dark-900/40">
+                <th class="py-3.5 pl-5 pr-2 w-12 text-center hidden sm:table-cell" data-i18n="col_number">#</th>
+                <th class="py-3.5 px-2 w-14 sm:w-16" data-i18n="col_cover">Cover</th>
+                <th class="py-3.5 px-3" data-i18n="col_title">Title</th>
+                <th class="py-3.5 px-3 hidden sm:table-cell" data-i18n="col_channel">Channel</th>
+                <th class="py-3.5 pl-3 pr-5 w-28 sm:w-36 text-right" data-i18n="col_actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.04] text-slate-300" id="all-songs-tbody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state text-center py-16 px-4 rounded-2xl border border-white/5 bg-dark-900/30"
+          id="all-songs-empty" style="display: none;">
+          <div class="text-4xl mb-3">🎵</div>
+          <h3 class="font-display font-semibold text-lg text-white" data-i18n="empty_library_title">Your Library is Empty</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto" data-i18n="empty_library_desc">Add songs from YouTube using the button below or at
+            the top right.</p>
+          <button
+            class="btn btn-primary bg-mint-500 hover:bg-mint-400 text-dark-950 font-semibold px-4 py-2 rounded-xl text-xs mt-4"
+            onclick="openAddSongModal()" data-i18n="empty_library_btn">+ Add Your First Song</button>
+        </div>
+      </section>
+
+      <!-- VIEW 3: FAVORITES -->
+      <section class="content-view space-y-6" id="view-favorites">
+        <div class="view-header flex items-center justify-between">
+          <div>
+            <h1 class="font-display font-bold text-2xl lg:text-3xl text-white" data-i18n="favorites_title">Favorites</h1>
+            <p class="text-xs text-slate-400 mt-1" data-i18n="favorites_subtitle">Your curated collection of loved songs.</p>
+          </div>
+          <button
+            class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-glow-mint-sm transition-all"
+            id="btn-play-all-favorites">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span data-i18n="play_favorites">Play Favorites</span>
+          </button>
+        </div>
+
+        <div class="table-container rounded-2xl border border-white/5 bg-dark-900/50 backdrop-blur-md overflow-x-auto">
+          <table class="song-table w-full text-left text-sm" id="favorites-table">
+            <thead class="hidden sm:table-header-group">
+              <tr
+                class="border-b border-white/5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase bg-dark-900/40">
+                <th class="py-3.5 pl-5 pr-2 w-12 text-center hidden sm:table-cell" data-i18n="col_number">#</th>
+                <th class="py-3.5 px-2 w-14 sm:w-16" data-i18n="col_cover">Cover</th>
+                <th class="py-3.5 px-3" data-i18n="col_title">Title</th>
+                <th class="py-3.5 px-3 hidden sm:table-cell" data-i18n="col_channel">Channel</th>
+                <th class="py-3.5 pl-3 pr-5 w-28 sm:w-36 text-right" data-i18n="col_actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.04] text-slate-300" id="favorites-tbody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state text-center py-16 px-4 rounded-2xl border border-white/5 bg-dark-900/30"
+          id="favorites-empty" style="display: none;">
+          <div class="text-4xl mb-3">🤍</div>
+          <h3 class="font-display font-semibold text-lg text-white" data-i18n="empty_favorites_title">No Favorites Yet</h3>
+          <p class="text-xs text-slate-400 mt-1" data-i18n="empty_favorites_desc">Tap the heart icon on any song to add it to your favorites list.</p>
+        </div>
+      </section>
+
+      <!-- VIEW 4: PLAYLIST DETAIL -->
+      <section class="content-view space-y-6" id="view-playlist-detail">
+        <!-- Playlist Detail Hero Header (Mobile-First Design) -->
+        <div
+          class="playlist-detail-header rounded-3xl p-5 sm:p-7 bg-gradient-to-b from-dark-900/90 via-dark-900/70 to-dark-950/90 border border-white/10 shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6"
+          id="playlist-detail-header">
+
+          <!-- Ambient Glow Orb behind cover -->
+          <div class="absolute -top-16 -left-16 w-52 h-52 bg-mint-500/15 rounded-full blur-3xl pointer-events-none">
+          </div>
+
+          <!-- Playlist Cover Artwork -->
+          <div
+            class="playlist-cover-large w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-mint-500 via-emerald-600 to-teal-800 flex items-center justify-center text-white shadow-glow-mint-sm flex-shrink-0 relative overflow-hidden border border-white/10 group shadow-2xl">
+            <svg class="w-12 h-12 sm:w-16 sm:h-16 text-mint-200 group-hover:scale-110 transition-transform duration-300"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none">
+            </div>
+          </div>
+
+          <!-- Playlist Meta Info & Action Controls -->
+          <div class="playlist-meta-info flex-1 space-y-2.5 text-center sm:text-left w-full min-w-0 z-10">
+            <div class="flex items-center justify-center sm:justify-start gap-2">
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-mint-500/15 text-mint-400 border border-mint-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-mint-400 animate-pulse"></span>
+                <span data-i18n="playlist_badge">Playlist</span>
+              </span>
+            </div>
+
+            <h1
+              class="playlist-title-display font-display font-extrabold text-2xl sm:text-3xl text-white tracking-tight leading-tight truncate"
+              id="detail-playlist-name">Playlist Title</h1>
+
+            <p class="playlist-desc-display text-xs sm:text-sm text-slate-400 line-clamp-2 max-w-lg mx-auto sm:mx-0"
+              id="detail-playlist-desc">Playlist Description</p>
+
+            <div
+              class="playlist-stats-bar text-xs text-slate-400 flex items-center justify-center sm:justify-start gap-2 pt-0.5 font-medium">
+              <span id="detail-playlist-count" class="text-slate-300 font-semibold"><span class="playlist-song-num">0</span> <span data-i18n="songs_count">songs</span></span>
+              <span>&bull;</span>
+              <span id="detail-playlist-updated" class="text-slate-500">Updated recently</span>
+            </div>
+
+            <!-- Responsive Action Buttons: Primary Play prominent on phone -->
+            <div class="playlist-header-buttons pt-3 flex flex-col sm:flex-row sm:items-center gap-2.5">
+              <button
+                class="btn btn-primary w-full sm:w-auto bg-gradient-to-r from-mint-500 to-emerald-500 hover:from-mint-400 hover:to-emerald-400 text-dark-950 font-extrabold px-6 py-2.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-glow-mint hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                id="btn-play-playlist">
+                <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <span data-i18n="play_all">Play All</span>
+              </button>
+
+              <div class="grid grid-cols-3 sm:flex items-center justify-center gap-2 w-full sm:w-auto">
+                <button
+                  class="btn btn-secondary bg-dark-800 hover:bg-dark-750 text-slate-200 border border-white/10 hover:border-white/20 px-2 sm:px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                  id="btn-add-to-current-playlist">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span data-i18n="add_song_btn">Add Song</span>
+                </button>
+
+                <button
+                  class="btn btn-outline border border-white/10 hover:border-white/20 text-slate-300 hover:text-white px-2 sm:px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                  id="btn-edit-playlist-info" aria-label="Edit Playlist Details">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  <span data-i18n="edit">Edit</span>
+                </button>
+
+                <button
+                  class="btn btn-outline-danger border border-rose-500/20 hover:border-rose-500/40 text-rose-400 hover:bg-rose-500/10 px-2 sm:px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                  id="btn-delete-playlist-action" aria-label="Delete Playlist" title="Delete Playlist">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  <span data-i18n="delete">Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container rounded-2xl border border-white/5 bg-dark-900/50 backdrop-blur-md overflow-x-auto">
+          <table class="song-table w-full text-left text-sm" id="playlist-songs-table">
+            <thead class="hidden sm:table-header-group">
+              <tr
+                class="border-b border-white/5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase bg-dark-900/40">
+                <th class="py-3.5 pl-5 pr-2 w-12 text-center hidden sm:table-cell" data-i18n="col_number">#</th>
+                <th class="py-3.5 px-2 w-14 sm:w-16" data-i18n="col_cover">Cover</th>
+                <th class="py-3.5 px-3" data-i18n="col_title">Title</th>
+                <th class="py-3.5 px-3 hidden sm:table-cell" data-i18n="col_channel">Channel</th>
+                <th class="py-3.5 px-3 w-28 text-center hidden md:table-cell" data-i18n="col_reorder">Reorder</th>
+                <th class="py-3.5 pl-3 pr-5 w-24 sm:w-28 text-right" data-i18n="col_actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.04] text-slate-300" id="playlist-songs-tbody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state text-center py-16 px-4 rounded-2xl border border-white/5 bg-dark-900/30"
+          id="playlist-empty-state" style="display: none;">
+          <div class="text-4xl mb-3">📁</div>
+          <h3 class="font-display font-semibold text-lg text-white" data-i18n="empty_playlist_title">This playlist is currently empty</h3>
+          <p class="text-xs text-slate-400 mt-1" data-i18n="empty_playlist_desc">Add songs from YouTube or pick from your existing library.</p>
+          <button
+            class="btn btn-primary bg-mint-500 hover:bg-mint-400 text-dark-950 font-semibold px-4 py-2 rounded-xl text-xs mt-4"
+            id="btn-empty-add-song" data-i18n="empty_playlist_btn">+ Add Songs to this Playlist</button>
+        </div>
+      </section>
+
+      <!-- VIEW 5: RECENTLY PLAYED HISTORY -->
+      <section class="content-view space-y-6" id="view-history">
+        <div class="view-header flex items-center justify-between">
+          <div>
+            <h1 class="font-display font-bold text-2xl lg:text-3xl text-white" data-i18n="history_title">Recently Played</h1>
+            <p class="text-xs text-slate-400 mt-1" data-i18n="history_subtitle">History recorded when songs start playing.</p>
+          </div>
+          <button
+            class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-glow-mint-sm transition-all"
+            id="btn-play-all-history">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span data-i18n="play_history">Play History</span>
+          </button>
+        </div>
+
+        <div class="table-container rounded-2xl border border-white/5 bg-dark-900/50 backdrop-blur-md overflow-x-auto">
+          <table class="song-table w-full text-left text-sm" id="history-table">
+            <thead>
+              <tr
+                class="border-b border-white/5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase bg-dark-900/40">
+                <th class="py-3.5 pl-5 pr-2 w-12 text-center hidden sm:table-cell" data-i18n="col_number">#</th>
+                <th class="py-3.5 px-2 w-14 sm:w-16" data-i18n="col_cover">Cover</th>
+                <th class="py-3.5 px-3" data-i18n="col_title">Title</th>
+                <th class="py-3.5 px-3 hidden sm:table-cell" data-i18n="col_channel">Channel</th>
+                <th class="py-3.5 px-3 hidden md:table-cell" data-i18n="col_played_at">Played At</th>
+                <th class="py-3.5 pl-3 pr-5 w-24 sm:w-28 text-right" data-i18n="col_actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.04] text-slate-300" id="history-tbody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state text-center py-16 px-4 rounded-2xl border border-white/5 bg-dark-900/30"
+          id="history-empty" style="display: none;">
+          <div class="text-4xl mb-3">⏳</div>
+          <h3 class="font-display font-semibold text-lg text-white" data-i18n="empty_history_title">No Listening History Yet</h3>
+          <p class="text-xs text-slate-400 mt-1" data-i18n="empty_history_desc">Play some songs to build your history log!</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==================================================== -->
+  <!-- 3. RIGHT PANEL: OFFICIAL YOUTUBE PLAYER & QUEUE      -->
+  <!-- ==================================================== -->
+  <aside
+    class="app-player-panel fixed xl:static inset-y-0 right-0 z-50 w-80 xl:w-auto bg-dark-900/95 xl:bg-dark-900/80 backdrop-blur-2xl border-l border-white/5 flex flex-col p-5 gap-4 overflow-hidden transition-transform duration-300 translate-x-full xl:translate-x-0"
+    id="app-player-panel" aria-label="Playback & Queue">
+
+    <div class="player-panel-header flex items-center justify-between">
+      <h2 class="panel-title font-display font-bold text-base text-white" data-i18n="now_playing">Now Playing</h2>
+      <button class="xl:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5"
+        id="close-player-panel-btn" aria-label="Close panel">✕</button>
+    </div>
+
+    <!-- Official YouTube Player Container & HTML5 Audio Visualizer -->
+    <div
+      class="youtube-player-wrapper aspect-video w-full rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative"
+      id="youtube-player-wrapper">
+      <div id="yt-player-container" class="w-full h-full">
+        <div
+          class="player-fallback-card w-full h-full flex flex-col items-center justify-center text-slate-500 gap-2.5 text-xs bg-dark-900 p-4 text-center">
+          <div
+            class="relative w-14 h-14 rounded-full border border-white/10 shadow-lg flex items-center justify-center bg-gradient-to-br from-dark-800 to-dark-950">
+            <div
+              class="w-7 h-7 rounded-full bg-mint-500/15 text-mint-400 flex items-center justify-center shadow-glow-mint-sm">
+              <svg class="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </div>
+          </div>
+          <p class="text-slate-400 font-medium" data-i18n="select_song_to_start">Select a song to start playback</p>
+        </div>
+      </div>
+
+      <!-- Modern Music Disc (Vinyl Deck) Visualizer Card -->
+      <div
+        class="audio-visualizer-card w-full h-full absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-dark-900 via-dark-950 to-dark-950 p-3 sm:p-4 text-center z-20 select-none group/turntable"
+        id="audio-visualizer-card" style="display: none;">
+
+        <!-- Ambient Atmospheric Mint Aura behind disc -->
+        <div class="absolute w-44 h-44 bg-mint-500/15 rounded-full blur-2xl pointer-events-none disc-glow-pulse"></div>
+
+        <!-- Turntable Deck Assembly -->
+        <div class="turntable-deck relative flex items-center justify-center my-auto">
+
+          <!-- Modern Tonearm (Stylus) at Top-Right -->
+          <div
+            class="turntable-tonearm absolute -top-2.5 -right-3.5 z-30 pointer-events-none transition-transform duration-700 ease-out"
+            id="music-disc-tonearm" title="Stylus Tonearm">
+            <!-- Pivot Base -->
+            <div
+              class="w-5 h-5 rounded-full bg-gradient-to-b from-slate-600 via-slate-700 to-slate-900 border border-white/20 shadow-lg flex items-center justify-center">
+              <div class="w-2 h-2 rounded-full bg-slate-300 border border-slate-900"></div>
+            </div>
+            <!-- Arm Rod -->
+            <div
+              class="tonearm-shaft w-1 h-12 bg-gradient-to-b from-slate-400 via-slate-200 to-slate-500 shadow-sm ml-2 -mt-0.5 origin-top rounded-full relative">
+              <!-- Headshell & Cartridge with glowing laser pickup -->
+              <div
+                class="absolute -bottom-2 -left-1.5 w-4 h-3 bg-dark-950 border border-slate-500/80 rounded shadow-md flex items-center justify-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-mint-400 shadow-glow-mint-sm animate-ping"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modern Music Disc (Vinyl Record) -->
+          <div
+            class="music-disc-record relative w-28 h-28 sm:w-32 sm:h-32 rounded-full flex items-center justify-center cursor-pointer shadow-2xl transition-transform hover:scale-105 active:scale-95"
+            id="music-disc-record" onclick="Player.togglePlay()" title="Click to Play / Pause">
+
+            <!-- Vinyl Body with Concentric Grooves -->
+            <div
+              class="disc-vinyl-grooves absolute inset-0 rounded-full border-2 border-slate-800 shadow-[0_0_25px_rgba(0,0,0,0.85),inset_0_0_20px_rgba(0,0,0,0.9)] overflow-hidden">
+              <!-- Radial Grooves Layer -->
+              <div class="disc-grooves-pattern absolute inset-0 rounded-full"></div>
+              <!-- Conic Specular Holographic Sheen -->
+              <div class="disc-conic-sheen absolute inset-0 rounded-full"></div>
+            </div>
+
+            <!-- Center Label Artwork & Spindle -->
+            <div
+              class="disc-center-label relative z-20 w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-mint-500 via-emerald-400 to-teal-500 shadow-xl border border-white/20">
+              <img src="" id="audio-vis-cover" class="w-full h-full rounded-full object-cover shadow-inner"
+                alt="Album art" onerror="this.src='/static/images/placeholder.svg'">
+              <!-- Center Spindle Hole with Metallic Ring -->
+              <div
+                class="absolute inset-0 m-auto w-3 h-3 rounded-full bg-dark-950 border-2 border-slate-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.9)] pointer-events-none z-30">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Direct Audio Badge & Live Frequency Spectrum Bars -->
+        <div class="mt-2 flex items-center justify-center gap-2 z-10">
+          <div
+            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-mint-500/15 text-mint-400 border border-mint-500/30 shadow-glow-mint-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-mint-400 animate-pulse"></span>
+            <span data-i18n="direct_audio">Direct Audio</span>
+          </div>
+          <div class="flex items-center gap-1 h-3.5 px-1" id="vis-bars">
+            <div class="w-0.5 bg-mint-400 rounded-full animate-pulse h-2"></div>
+            <div class="w-0.5 bg-mint-500 rounded-full animate-bounce h-3.5"></div>
+            <div class="w-0.5 bg-emerald-400 rounded-full animate-pulse h-2.5"></div>
+            <div class="w-0.5 bg-mint-400 rounded-full animate-bounce h-3.5"></div>
+            <div class="w-0.5 bg-teal-400 rounded-full animate-pulse h-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="player-loading-overlay absolute inset-0 bg-dark-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-mint-400 text-xs z-30"
+        id="player-loading-overlay" style="display: none;">
+        <div class="w-6 h-6 border-2 border-mint-500/30 border-t-mint-400 rounded-full animate-spin"></div>
+        <span id="player-loading-text">Loading audio / video...</span>
+      </div>
+    </div>
+
+    <!-- Hidden HTML5 Audio Element for direct playback -->
+    <audio id="html5-audio" preload="auto" class="hidden"></audio>
+
+    <!-- Autoplay blocked prompt banner -->
+    <div
+      class="autoplay-alert-box p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-2"
+      id="autoplay-alert-box" style="display: none;">
+      <span>Browser blocked autoplay:</span>
+      <button class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-dark-950 font-bold rounded-lg text-[11px]"
+        id="btn-unblock-autoplay">Tap to Play</button>
+    </div>
+
+    <!-- Error Alert Banner with 1-click Download -->
+    <div
+      class="player-error-box p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs space-y-2"
+      id="player-error-box" style="display: none;">
+      <span class="error-text block leading-snug" id="player-error-text">This video cannot be played embedded.</span>
+      <div class="error-actions flex flex-wrap items-center gap-2">
+        <button
+          class="px-3 py-1.5 bg-mint-500 hover:bg-mint-400 text-dark-950 font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-glow-mint-sm transition-all"
+          id="btn-error-download">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+          </svg>
+          <span id="btn-error-download-text">Download & Play Directly</span>
+        </button>
+        <button class="px-2.5 py-1 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-lg text-[11px]"
+          id="btn-error-next">Next Song</button>
+        <a href="#" target="_blank" rel="noopener noreferrer"
+          class="px-2.5 py-1 border border-white/20 hover:border-white/40 text-slate-300 rounded-lg text-[11px]"
+          id="btn-error-yt-link">Open on YouTube</a>
+      </div>
+    </div>
+
+    <!-- Current Song Meta Card -->
+    <div class="now-playing-meta pb-3 border-b border-white/5 space-y-1">
+      <div class="now-playing-title font-semibold text-sm text-white truncate" id="now-playing-title" data-i18n="no_song_playing">No song playing
+      </div>
+      <div class="now-playing-channel text-xs text-mint-400 font-medium truncate" id="now-playing-channel" data-i18n="sak_player_subtitle">Sak Music
+        Player</div>
+    </div>
+
+    <!-- Queue Header & Actions -->
+    <div class="queue-header flex items-center justify-between">
+      <div class="queue-title-wrap flex items-center gap-2">
+        <span class="queue-title font-semibold text-xs text-slate-400 tracking-wider uppercase" data-i18n="upcoming_queue">Upcoming Queue</span>
+        <span class="badge-count text-[11px] px-2 py-0.5 rounded-full bg-dark-800 text-slate-400"
+          id="queue-count-badge">0</span>
+      </div>
+      <div class="queue-actions flex items-center gap-1.5">
+        <button
+          class="px-2 py-0.5 rounded-lg border border-white/10 hover:border-white/20 text-slate-400 hover:text-white text-[11px]"
+          id="btn-shuffle-queue" title="Shuffle queue tracks" data-i18n="shuffle">Shuffle</button>
+        <button class="px-2 py-0.5 rounded-lg border border-rose-500/20 hover:bg-rose-500/10 text-rose-400 text-[11px]"
+          id="btn-clear-queue" title="Clear current queue" data-i18n="clear">Clear</button>
+      </div>
+    </div>
+
+    <!-- Queue Items List -->
+    <div class="queue-list-scroll flex-1 overflow-y-auto pr-1 custom-scrollbar">
+      <ul class="queue-list space-y-1.5" id="queue-items-list">
+        <li class="queue-empty-msg py-8 text-center text-xs italic text-slate-500" id="queue-empty-msg" data-i18n="queue_empty">Queue is empty.
+          Select songs or click Play All to begin.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- ==================================================== -->
+  <!-- 4. PERSISTENT BOTTOM PLAYBACK CONTROLS (DESKTOP)     -->
+  <!-- ==================================================== -->
+  <footer
+    class="app-bottom-player hidden md:flex col-span-full h-[88px] bg-dark-900/90 backdrop-blur-2xl border-t border-white/10 px-6 items-center justify-between gap-6 z-40"
+    id="app-bottom-player" aria-label="Playback Controls">
+
+    <!-- Left: Track Mini Info -->
+    <div class="player-track-info flex items-center gap-3 w-56 lg:w-72 overflow-hidden">
+      <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Track thumbnail"
+        class="track-thumb-mini w-12 h-12 rounded-xl object-cover bg-black border border-white/10 flex-shrink-0"
+        id="mini-track-thumb">
+      <div class="track-text-mini overflow-hidden">
+        <div class="track-title-mini font-semibold text-sm text-slate-100 truncate" id="mini-track-title" data-i18n="not_playing">Not Playing
+        </div>
+        <div class="track-channel-mini text-xs text-slate-400 truncate" id="mini-track-channel">Sak Music</div>
+      </div>
+      <button class="p-1.5 text-slate-400 hover:text-rose-400 transition-colors" id="mini-favorite-btn"
+        title="Add to favorites" aria-label="Favorite toggle">
+        <svg class="heart-icon w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24" stroke-width="2">
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Center: Main Playback Controls & Progress Bar -->
+    <div class="player-center-controls flex-1 max-w-xl flex flex-col items-center gap-1.5">
+      <div class="control-buttons-row flex items-center gap-5">
+
+        <!-- Shuffle Toggle Button -->
+        <button class="btn-icon-control text-slate-400 hover:text-white transition-colors" id="btn-control-shuffle"
+          title="Toggle Shuffle" aria-label="Shuffle">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </button>
+
+        <!-- Previous Button -->
+        <button class="btn-icon-control text-slate-300 hover:text-white transition-colors" id="btn-control-prev"
+          title="Previous" aria-label="Previous">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <polygon points="19 20 9 12 19 4 19 20"></polygon>
+            <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"></line>
+          </svg>
+        </button>
+
+        <!-- Main Play / Pause Button -->
+        <button
+          class="btn-play-main w-10 h-10 rounded-full bg-gradient-to-tr from-mint-500 to-emerald-400 hover:scale-105 active:scale-95 text-dark-950 flex items-center justify-center shadow-glow-mint transition-all"
+          id="btn-control-play-pause" title="Play or Pause" aria-label="Play">
+          <svg class="icon-play w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <svg class="icon-pause w-5 h-5 fill-current" viewBox="0 0 24 24" style="display: none;">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        </button>
+
+        <!-- Next Button -->
+        <button class="btn-icon-control text-slate-300 hover:text-white transition-colors" id="btn-control-next"
+          title="Next" aria-label="Next">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line>
+          </svg>
+        </button>
+
+        <!-- Repeat Toggle Button -->
+        <button class="btn-icon-control relative text-slate-400 hover:text-white transition-colors"
+          id="btn-control-repeat" title="Repeat Mode: Off" aria-label="Repeat mode">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+          <span
+            class="repeat-one-indicator absolute -top-1 -right-1.5 w-3 h-3 bg-mint-500 text-dark-950 font-bold rounded-full text-[9px] hidden items-center justify-center"
+            id="repeat-one-indicator">1</span>
+        </button>
+      </div>
+
+      <!-- Seek Bar & Duration -->
+      <div class="progress-bar-row w-full flex items-center gap-3">
+        <span class="time-label font-mono text-[11px] text-slate-400 w-9 text-right" id="current-time-label">0:00</span>
+        <div class="seek-slider-container flex-1 relative flex items-center">
+          <input type="range" min="0" max="100" value="0"
+            class="seek-slider w-full h-1 bg-white/15 rounded-lg appearance-none cursor-pointer hover:h-1.5 transition-all"
+            id="seek-slider" aria-label="Seek time slider">
+          <div
+            class="seek-fill absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-mint-500 to-emerald-400 rounded-lg pointer-events-none"
+            id="seek-fill" style="width: 0%;"></div>
+        </div>
+        <span class="time-label font-mono text-[11px] text-slate-400 w-9 text-left" id="duration-time-label">0:00</span>
+      </div>
+    </div>
+
+    <!-- Right: Volume & Queue Panel Toggle -->
+    <div class="player-right-controls flex items-center justify-end gap-3 w-56 lg:w-72">
+      <!-- Volume Controls -->
+      <div class="volume-control-wrap hidden sm:flex items-center gap-2 w-32">
+        <button class="p-1.5 text-slate-400 hover:text-white" id="btn-volume-mute" title="Mute/Unmute"
+          aria-label="Mute toggle">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+        <input type="range" min="0" max="100" value="80"
+          class="volume-slider w-full h-1 bg-white/15 rounded-lg appearance-none cursor-pointer" id="volume-slider"
+          aria-label="Volume slider">
+      </div>
+
+      <!-- Queue Visibility Toggle Button -->
+      <button class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors"
+        id="btn-toggle-queue-panel" title="Toggle Queue Panel" aria-label="Toggle Queue">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ==================================================== -->
+  <!-- MOBILE FLOATING DOCK (md:hidden)                     -->
+  <!-- ==================================================== -->
+  <div
+    class="mobile-player-dock fixed bottom-0 inset-x-0 z-40 md:hidden flex flex-col pointer-events-none pb-[env(safe-area-inset-bottom)]"
+    id="mobile-player-dock">
+
+    <!-- Floating Mini Player -->
+    <div
+      class="mobile-mini-player pointer-events-auto mx-2.5 mb-1.5 rounded-2xl bg-dark-900/95 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden transition-all duration-200"
+      id="mobile-mini-player">
+      <!-- 2px Top Accent Progress Bar -->
+      <div class="w-full h-1 bg-white/10 relative">
+        <div class="h-full bg-gradient-to-r from-mint-500 to-emerald-400 rounded-r-full transition-all duration-150"
+          id="mobile-seek-fill" style="width: 0%;"></div>
+      </div>
+
+      <!-- Mini Player Content Row -->
+      <div class="flex items-center justify-between px-3 py-2 gap-3">
+        <!-- Tap Area (Thumbnail + Title/Channel) opens Full Player Sheet -->
+        <div class="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer" id="mobile-mini-expand-trigger">
+          <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Track thumbnail"
+            class="w-10 h-10 rounded-xl object-cover bg-black border border-white/10 flex-shrink-0 shadow-md"
+            id="mobile-mini-thumb">
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-xs text-white truncate" id="mobile-mini-title">Not Playing</div>
+            <div class="text-[11px] text-mint-400 font-medium truncate" id="mobile-mini-channel">Sak Music</div>
+          </div>
+        </div>
+
+        <!-- Mini Player Actions -->
+        <div class="flex items-center gap-1 flex-shrink-0">
+          <button class="p-2 text-slate-400 hover:text-rose-400 active:scale-90 transition-transform"
+            id="mobile-mini-fav-btn" title="Favorite" aria-label="Favorite">
+            <svg class="heart-icon w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" stroke-width="2">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+
+          <button
+            class="w-9 h-9 rounded-full bg-gradient-to-tr from-mint-500 to-emerald-400 text-dark-950 flex items-center justify-center shadow-glow-mint-sm active:scale-90 transition-transform"
+            id="mobile-mini-play-pause" title="Play or Pause" aria-label="Play">
+            <svg class="mobile-icon-play w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <svg class="mobile-icon-pause w-4 h-4 fill-current" viewBox="0 0 24 24" style="display: none;">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </button>
+
+          <button class="p-2 text-slate-300 hover:text-white active:scale-90 transition-transform" id="mobile-mini-next"
+            title="Next Song" aria-label="Next">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav
+      class="mobile-bottom-nav pointer-events-auto h-14 bg-dark-950/95 backdrop-blur-2xl border-t border-white/10 grid grid-cols-4 items-center px-1"
+      id="mobile-bottom-nav">
+      <button
+        class="mobile-nav-btn active flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white"
+        data-view="dashboard" id="mob-nav-home">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+        <span class="text-[10px] font-medium" data-i18n="nav_home">Home</span>
+      </button>
+
+      <button class="mobile-nav-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white"
+        data-view="all-songs" id="mob-nav-songs">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
+        </svg>
+        <span class="text-[10px] font-medium" data-i18n="all_songs_title">Songs</span>
+      </button>
+
+      <button class="mobile-nav-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white"
+        id="mob-nav-playlists">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15V6"></path>
+          <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path>
+          <path d="M12 12H3"></path>
+          <path d="M16 6H3"></path>
+          <path d="M12 18H3"></path>
+        </svg>
+        <span class="text-[10px] font-medium" data-i18n="nav_playlists">Playlists</span>
+      </button>
+
+      <button
+        class="mobile-nav-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white relative"
+        id="mob-nav-player">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+          <line x1="7" y1="2" x2="7" y2="22"></line>
+          <line x1="17" y1="2" x2="17" y2="22"></line>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+        </svg>
+        <span class="text-[10px] font-medium" data-i18n="sak_player_subtitle">Player</span>
+      </button>
+    </nav>
+  </div>
+
+</div>
+
+<!-- ==================================================== -->
+<!-- 5. ACCESSIBLE MODALS                                 -->
+<!-- ==================================================== -->
+
+<!-- Modal A: Add Song to Library Modal -->
+<div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+  id="modal-add-song" role="dialog" aria-modal="true" aria-labelledby="modal-add-song-title" style="display: none;">
+  <div
+    class="modal-card w-full max-w-lg bg-dark-900 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="modal-header flex items-center justify-between border-b border-white/5 pb-4">
+      <h2 class="modal-title font-display font-bold text-lg text-white" id="modal-add-song-title" data-i18n="modal_add_title">Add Song from YouTube</h2>
+      <button class="modal-close-btn text-slate-400 hover:text-white text-2xl leading-none"
+        onclick="closeModal('modal-add-song')" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="form-group space-y-1.5">
+        <label for="input-yt-url" class="text-xs font-semibold text-slate-300" data-i18n="youtube_url_label">YouTube Video URL or ID</label>
+        <div class="flex gap-2">
+          <input type="url" id="input-yt-url"
+            class="flex-1 bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+            placeholder="e.g. https://www.youtube.com/watch?v=... or dQw4w9WgXcQ" data-i18n-placeholder="youtube_url_placeholder" autocomplete="off">
+          <button type="button"
+            class="px-4 py-2 bg-dark-800 hover:bg-dark-750 text-slate-200 border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-2"
+            id="btn-preview-metadata">
+            <span id="preview-btn-text">Preview</span>
+            <div class="spinner-sm w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"
+              id="preview-spinner" style="display: none;"></div>
+          </button>
+        </div>
+        <small class="form-hint text-[11px] text-slate-500 block">Supports youtube.com/watch?v=, youtu.be/, shorts/,
+          live/, and music.youtube.com</small>
+        <!-- Playlist Detection Hint -->
+        <div class="mt-2 p-2.5 rounded-xl bg-mint-500/10 border border-mint-500/20 text-xs text-mint-300 flex items-center justify-between gap-2"
+          id="alert-add-song-is-playlist" style="display: none;">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-[11px] leading-tight" data-i18n="playlist_url_detected">YouTube playlist link detected!</span>
+          </div>
+          <button type="button" class="px-2.5 py-1 bg-mint-500 hover:bg-mint-400 text-dark-950 font-bold rounded-lg text-[10px] flex-shrink-0 transition-colors"
+            id="btn-switch-to-import-playlist" data-i18n="import_as_playlist_btn">Import Playlist &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="preview-card flex items-center gap-3 p-3 rounded-2xl bg-dark-850/80 border border-white/5"
+        id="metadata-preview-card" style="display: none;">
+        <img src="" alt="Thumbnail" class="preview-thumb w-20 h-14 object-cover rounded-xl bg-black flex-shrink-0"
+          id="preview-thumb-img">
+        <div class="preview-info overflow-hidden">
+          <div class="preview-title font-semibold text-xs text-white truncate" id="preview-title-text">Title</div>
+          <div class="preview-channel text-[11px] text-mint-400 truncate" id="preview-channel-text">Channel</div>
+          <div class="preview-note text-[10px] text-slate-500 line-clamp-1 mt-0.5" id="preview-note-text"></div>
+        </div>
+      </div>
+
+      <!-- Optional / Editable Title -->
+      <div class="form-group space-y-1.5">
+        <label for="input-custom-title" class="text-xs font-semibold text-slate-300">Song Title (Editable)</label>
+        <input type="text" id="input-custom-title"
+          class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+          placeholder="Auto-filled from YouTube, or type your own...">
+      </div>
+
+      <!-- Optional Target Playlist -->
+      <div class="form-group space-y-1.5">
+        <label for="select-target-playlist" class="text-xs font-semibold text-slate-300" data-i18n="add_to_playlist_label">Add directly to playlist
+          (Optional)</label>
+        <select id="select-target-playlist"
+          class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-mint-500">
+          <option value="" data-i18n="select_playlist_placeholder">-- Personal Library Only --</option>
+          {% for pl in playlists %}
+          <option value="{{ pl.id }}">{{ pl.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Download Audio Option -->
+      <div
+        class="flex items-center gap-2.5 p-3 rounded-xl bg-mint-500/10 border border-mint-500/20 text-xs text-mint-300">
+        <input type="checkbox" id="input-download-audio" checked
+          class="w-4 h-4 rounded text-mint-500 bg-dark-900 border-white/20 focus:ring-mint-500 focus:ring-offset-0 cursor-pointer">
+        <label for="input-download-audio" class="cursor-pointer font-medium leading-tight">
+          Download audio for instant local playback (Bypasses YouTube embed restrictions & ads)
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+      <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+        onclick="closeModal('modal-add-song')" data-i18n="cancel">Cancel</button>
+      <button type="button"
+        class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-5 py-2 rounded-xl text-xs shadow-glow-mint-sm"
+        id="btn-save-song-submit" data-i18n="add_to_library">Add to Library</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal B: Create Playlist Modal (with Blank & YouTube Import modes) -->
+<div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+  id="modal-create-playlist" role="dialog" aria-modal="true" aria-labelledby="modal-create-pl-title"
+  style="display: none;">
+  <div class="modal-card w-full max-w-md bg-dark-900 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5">
+    <div class="modal-header flex items-center justify-between border-b border-white/5 pb-4">
+      <h2 class="modal-title font-display font-bold text-lg text-white" id="modal-create-pl-title" data-i18n="modal_create_playlist_title">Create New Playlist</h2>
+      <button class="modal-close-btn text-slate-400 hover:text-white text-2xl leading-none"
+        onclick="closeModal('modal-create-playlist')" aria-label="Close dialog">&times;</button>
+    </div>
+
+    <!-- Mode Selector Tabs -->
+    <div class="flex p-1 bg-dark-850 rounded-2xl border border-white/5 gap-1" id="playlist-modal-tabs">
+      <button type="button" id="tab-playlist-blank-btn"
+        class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-white bg-dark-750 shadow-sm transition-all flex items-center justify-center gap-1.5 border border-white/5"
+        data-i18n="tab_blank_playlist">
+        <svg class="w-3.5 h-3.5 text-mint-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        <span>Blank Playlist</span>
+      </button>
+      <button type="button" id="tab-playlist-import-btn"
+        class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5"
+        data-i18n="tab_import_playlist">
+        <svg class="w-3.5 h-3.5 text-mint-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+        <span>From YouTube Link</span>
+      </button>
+    </div>
+
+    <!-- Panel 1: Blank Playlist -->
+    <div id="panel-playlist-blank" class="space-y-4">
+      <div class="modal-body space-y-4">
+        <div class="form-group space-y-1.5">
+          <label for="input-playlist-name" class="text-xs font-semibold text-slate-300" data-i18n="playlist_name_label">Playlist Name</label>
+          <input type="text" id="input-playlist-name"
+            class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+            placeholder="e.g. Chill Vibes, Morning Coffee..." data-i18n-placeholder="playlist_name_placeholder" maxlength="150" required>
+        </div>
+        <div class="form-group space-y-1.5">
+          <label for="input-playlist-desc" class="text-xs font-semibold text-slate-300" data-i18n="description_label">Description (Optional)</label>
+          <textarea id="input-playlist-desc"
+            class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+            rows="3" placeholder="What is this playlist about?" data-i18n-placeholder="description_placeholder"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+          onclick="closeModal('modal-create-playlist')" data-i18n="cancel">Cancel</button>
+        <button type="button"
+          class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-5 py-2 rounded-xl text-xs shadow-glow-mint-sm"
+          id="btn-create-playlist-submit" data-i18n="create_playlist">Create Playlist</button>
+      </div>
+    </div>
+
+    <!-- Panel 2: Import from YouTube Link -->
+    <div id="panel-playlist-import" class="space-y-4" style="display: none;">
+      <div class="modal-body space-y-4">
+        <!-- YouTube Playlist URL Input -->
+        <div class="form-group space-y-1.5">
+          <label for="input-playlist-import-url" class="text-xs font-semibold text-slate-300" data-i18n="playlist_url_label">YouTube Playlist URL</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="input-playlist-import-url"
+              class="flex-1 bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+              placeholder="e.g. https://youtube.com/playlist?list=..." data-i18n-placeholder="playlist_url_placeholder" autocomplete="off">
+            <button type="button"
+              class="px-4 py-2 bg-dark-800 hover:bg-dark-750 text-slate-200 border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-2"
+              id="btn-preview-playlist-url">
+              <span id="preview-playlist-btn-text" data-i18n="preview_btn">Preview</span>
+              <div class="spinner-sm w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"
+                id="preview-playlist-spinner" style="display: none;"></div>
+            </button>
+          </div>
+          <small class="form-hint text-[11px] text-slate-500 block" data-i18n="playlist_url_hint">Supports youtube.com/playlist?list=... and video URLs containing a playlist</small>
+        </div>
+
+        <!-- Playlist Preview Card -->
+        <div class="preview-card flex items-center gap-3 p-3 rounded-2xl bg-dark-850/80 border border-white/5"
+          id="playlist-import-preview-card" style="display: none;">
+          <img src="" alt="Cover" class="preview-thumb w-20 h-14 object-cover rounded-xl bg-black flex-shrink-0"
+            id="preview-playlist-thumb-img">
+          <div class="preview-info overflow-hidden flex-1 min-w-0">
+            <div class="preview-title font-semibold text-xs text-white truncate" id="preview-playlist-title-text">Playlist Title</div>
+            <div class="preview-channel text-[11px] text-mint-400 truncate" id="preview-playlist-channel-text">Channel</div>
+            <div class="mt-1 flex items-center gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-mint-500/10 text-mint-400 border border-mint-500/20"
+                id="preview-playlist-count-badge">0 tracks</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editable Name -->
+        <div class="form-group space-y-1.5">
+          <label for="input-playlist-import-name" class="text-xs font-semibold text-slate-300" data-i18n="playlist_name_label">Playlist Name</label>
+          <input type="text" id="input-playlist-import-name"
+            class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+            placeholder="Auto-filled from YouTube, or type your own..." maxlength="150">
+        </div>
+
+        <!-- Editable Description -->
+        <div class="form-group space-y-1.5">
+          <label for="input-playlist-import-desc" class="text-xs font-semibold text-slate-300" data-i18n="description_label">Description (Optional)</label>
+          <textarea id="input-playlist-import-desc"
+            class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-mint-500"
+            rows="2" placeholder="Auto-filled from YouTube, or type your own..."></textarea>
+        </div>
+
+        <!-- Download Audio Option -->
+        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-mint-500/10 border border-mint-500/20 text-xs text-mint-300">
+          <input type="checkbox" id="input-playlist-download-audio" checked
+            class="w-4 h-4 rounded text-mint-500 bg-dark-900 border-white/20 focus:ring-mint-500 focus:ring-offset-0 cursor-pointer">
+          <label for="input-playlist-download-audio" class="cursor-pointer font-medium leading-tight">
+            Download audio in background for offline & restriction-free playback
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+          onclick="closeModal('modal-create-playlist')" data-i18n="cancel">Cancel</button>
+        <button type="button"
+          class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-5 py-2 rounded-xl text-xs shadow-glow-mint-sm flex items-center gap-2"
+          id="btn-import-playlist-submit">
+          <span id="import-playlist-submit-text" data-i18n="import_playlist">Import Playlist</span>
+          <div class="spinner-sm w-3.5 h-3.5 border-2 border-dark-950 border-t-white rounded-full animate-spin"
+            id="import-playlist-spinner" style="display: none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal C: Edit Playlist Modal -->
+<div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+  id="modal-edit-playlist" role="dialog" aria-modal="true" aria-labelledby="modal-edit-pl-title" style="display: none;">
+  <div class="modal-card w-full max-w-md bg-dark-900 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5">
+    <div class="modal-header flex items-center justify-between border-b border-white/5 pb-4">
+      <h2 class="modal-title font-display font-bold text-lg text-white" id="modal-edit-pl-title" data-i18n="modal_edit_playlist_title">Edit Playlist</h2>
+      <button class="modal-close-btn text-slate-400 hover:text-white text-2xl leading-none"
+        onclick="closeModal('modal-edit-playlist')" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <input type="hidden" id="edit-playlist-id">
+      <div class="form-group space-y-1.5">
+        <label for="edit-playlist-name" class="text-xs font-semibold text-slate-300" data-i18n="playlist_name_label">Playlist Name</label>
+        <input type="text" id="edit-playlist-name"
+          class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-mint-500"
+          maxlength="150" required>
+      </div>
+      <div class="form-group space-y-1.5">
+        <label for="edit-playlist-desc" class="text-xs font-semibold text-slate-300" data-i18n="description_label">Description</label>
+        <textarea id="edit-playlist-desc"
+          class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-mint-500"
+          rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+      <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+        onclick="closeModal('modal-edit-playlist')" data-i18n="cancel">Cancel</button>
+      <button type="button"
+        class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-5 py-2 rounded-xl text-xs shadow-glow-mint-sm"
+        id="btn-edit-playlist-submit" data-i18n="save_changes">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal D: Add Existing Library Song to Playlist Modal -->
+<div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+  id="modal-add-to-playlist" role="dialog" aria-modal="true" aria-labelledby="modal-atp-title" style="display: none;">
+  <div class="modal-card w-full max-w-md bg-dark-900 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5">
+    <div class="modal-header flex items-center justify-between border-b border-white/5 pb-4">
+      <h2 class="modal-title font-display font-bold text-lg text-white" id="modal-atp-title" data-i18n="add_song_btn">Add to Playlist</h2>
+      <button class="modal-close-btn text-slate-400 hover:text-white text-2xl leading-none"
+        onclick="closeModal('modal-add-to-playlist')" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <input type="hidden" id="atp-song-id">
+      <p id="atp-song-title" class="text-xs text-slate-400 truncate">Song Title</p>
+      <div class="form-group space-y-1.5">
+        <label for="atp-playlist-select" class="text-xs font-semibold text-slate-300">Choose Playlist:</label>
+        <select id="atp-playlist-select"
+          class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-mint-500">
+          <!-- Populated via JS -->
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+      <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+        onclick="closeModal('modal-add-to-playlist')" data-i18n="cancel">Cancel</button>
+      <button type="button"
+        class="btn btn-primary bg-gradient-to-r from-mint-500 to-emerald-600 hover:from-mint-400 hover:to-emerald-500 text-dark-950 font-bold px-5 py-2 rounded-xl text-xs shadow-glow-mint-sm"
+        id="btn-atp-submit" data-i18n="add_song_btn">Add to Playlist</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal E: Confirmation Dialog -->
+<div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+  id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title" style="display: none;">
+  <div class="modal-card w-full max-w-sm bg-dark-900 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+    <div class="modal-header flex items-center justify-between border-b border-white/5 pb-3">
+      <h2 class="modal-title font-display font-bold text-base text-rose-400" id="modal-confirm-title" data-i18n="confirm_action">Confirm Action
+      </h2>
+      <button class="modal-close-btn text-slate-400 hover:text-white text-2xl leading-none"
+        onclick="closeModal('modal-confirm')" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-dialog-message" class="text-sm text-slate-300 leading-relaxed">Are you sure you want to proceed?
+      </p>
+    </div>
+    <div class="modal-footer flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+      <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+        onclick="closeModal('modal-confirm')" data-i18n="cancel">Cancel</button>
+      <button type="button"
+        class="px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-lg transition-all"
+        id="btn-confirm-action-submit" data-i18n="confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Official YouTube IFrame Player API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<!-- Application Scripts -->
+<script src="{{ url_for('static', filename='js/i18n.js') }}?v=13"></script>
+<script src="{{ url_for('static', filename='js/api.js') }}?v=13"></script>
+<script src="{{ url_for('static', filename='js/player.js') }}?v=13"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}?v=13"></script>
+{% endblock %}
