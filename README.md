@@ -31,8 +31,9 @@ Sak Music is a modern, responsive web application built with **Python Flask** th
   - Transactional position re-indexing.
   - Deleting a playlist safely preserves the songs in the user's personal library.
 
-- 🎧 **Persistent Playback**:
+- 🎧 **Persistent Playback & Refresh Resilience**:
   - **Single Page Application (SPA) Shell**: Navigation between views (Dashboard, All Songs, Favorites, Playlists, History) never reloads the page or interrupts YouTube playback!
+  - **Refresh-Proof State**: Active playback, current timestamp position, and queue are auto-persisted to `localStorage` and resume seamlessly across page refreshes (F5).
   - Fully visible, official YouTube IFrame Player (meeting YouTube terms and dimension requirements).
   - Controls: Play/Pause, Previous (restarts if > 3s), Next, Seek slider, Time/Duration display, Volume slider & Mute toggle.
   - Modes: Shuffle without repeats, Repeat (Off, All, One).
@@ -40,9 +41,15 @@ Sak Music is a modern, responsive web application built with **Python Flask** th
   - Automatic listening history logging when playback starts.
   - Graceful handling of browser autoplay restrictions and unavailable/restricted video errors.
 
+- 🌍 **Internationalization (i18n)**:
+  - Tri-lingual support: **English (EN 🇬🇧)**, **Khmer (KH 🇰🇭)**, and **Chinese (CN 🇨🇳)**.
+  - Instant in-place translation across navigation, library counts, queue, modals, and toasts without page reload.
+  - Quick cycle switcher in topbar and compact flag-only switcher in user dropdown.
+
 - 🎨 **Design Aesthetics**:
   - Contemporary Charcoal & Soft Mint-Green palette with subtle glassmorphic elements.
-  - Clean English typography and responsive layouts.
+  - Clean multilingual typography with font fallbacks for English, Khmer, and Chinese.
+  - Responsive layouts optimized for desktop, tablet, and mobile with dedicated mini-player.
 
 ---
 
@@ -218,5 +225,6 @@ This application strictly adheres to the official YouTube IFrame Player API term
 - Playback occurs exclusively through the official YouTube player embed.
 - Ads served by YouTube are unaltered and unobstructed.
 - Embedding permissions remain under the control of the respective video owners.
-#   N o A d s _ M u s i c  
+#   N o A d s _ M u s i c 
+ 
  
