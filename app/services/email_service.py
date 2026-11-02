@@ -15,7 +15,7 @@ def send_password_reset_code(to_email: str, code: str) -> bool:
     mail_port = current_app.config.get('MAIL_PORT', 587)
     use_tls = current_app.config.get('MAIL_USE_TLS', True)
     use_ssl = current_app.config.get('MAIL_USE_SSL', False)
-    default_sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'Sak Music Account <no-reply@sakmusic.local>')
+    default_sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'Mayūra. Account <no-reply@sakmusic.local>')
 
     # Formatted exactly to trigger Gmail's native "Code Requested" copy-code card and match the screenshot
     html_content = f"""<!DOCTYPE html>
@@ -23,7 +23,7 @@ def send_password_reset_code(to_email: str, code: str) -> bool:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sak Music Account - Verification Code</title>
+  <title>Mayūra. Account - Verification Code</title>
   <style>
     body {{
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -128,7 +128,7 @@ def send_password_reset_code(to_email: str, code: str) -> bool:
           </div>
         </td>
         <td style="vertical-align: middle;">
-          <span style="font-size: 16px; font-weight: 700; color: #0f172a;">Sak Music Account</span>
+          <span style="font-size: 16px; font-weight: 700; color: #0f172a;">Mayūra. Account</span>
           <span style="display: inline-block; width: 16px; height: 16px; background: #0284c7; color: #ffffff; border-radius: 50%; font-size: 10px; line-height: 16px; text-align: center; margin-left: 4px; vertical-align: middle;">&#10003;</span>
         </td>
       </tr>
@@ -147,11 +147,11 @@ def send_password_reset_code(to_email: str, code: str) -> bool:
     </div>
 
     <p class="message">
-      Someone tried to use Sak Music Account Center to modify your account settings. If this was you, please use the code above to confirm your identity. The verification code is valid for 10 minutes.
+      Someone tried to use Mayūra. Account Center to modify your account settings. If this was you, please use the code above to confirm your identity. The verification code is valid for 10 minutes.
     </p>
 
     <div class="footer">
-      This is an automated message from Sak Music. Please do not reply to this email.
+      This is an automated message from Mayūra. Please do not reply to this email.
     </div>
   </div>
 </body>
@@ -163,7 +163,7 @@ Verification code:
 
 {code}
 
-Someone tried to use Sak Music Account Center to modify your account settings. If this was you, please use the code above to confirm your identity. The verification code is valid for 10 minutes.
+Someone tried to use Mayūra. Account Center to modify your account settings. If this was you, please use the code above to confirm your identity. The verification code is valid for 10 minutes.
 """
 
     if not mail_server or not mail_username:
@@ -172,7 +172,7 @@ Someone tried to use Sak Music Account Center to modify your account settings. I
 
     try:
         msg = EmailMessage()
-        msg['Subject'] = 'Sak Music Account - Verification Code'
+        msg['Subject'] = 'Mayūra. Account - Verification Code'
         msg['From'] = default_sender
         msg['To'] = to_email
         msg.set_content(plain_content)

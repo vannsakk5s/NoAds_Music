@@ -7,7 +7,7 @@ from app.models.user import User
 
 
 def create_app(config_name=None):
-    """Application factory for Sak Music."""
+    """Application factory for Mayūra."""
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'default')
 
@@ -122,7 +122,7 @@ def register_cli_commands(app: Flask):
             {
                 'id': 'DWcJFNfaw9c',
                 'title': 'Khmer Acoustic Chill - Melodies of Cambodia',
-                'channel': 'Sak Music Khmer Selection',
+                'channel': 'Mayūra. Khmer Selection',
                 'thumb': 'https://img.youtube.com/vi/DWcJFNfaw9c/hqdefault.jpg'
             },
             {

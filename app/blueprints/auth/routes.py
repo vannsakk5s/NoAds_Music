@@ -73,7 +73,7 @@ def register():
         db.session.commit()
 
         login_user(user)
-        flash('Registration successful! Welcome to Sak Music.', 'success')
+        flash('Registration successful! Welcome to Mayūra.', 'success')
         return redirect(url_for('main.index'))
 
     return render_template('auth/register.html', form=form)

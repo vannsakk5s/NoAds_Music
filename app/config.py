@@ -59,7 +59,7 @@ class Config:
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() in ('true', '1', 't')
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Sak Music <no-reply@sakmusic.local>')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Mayūra. <no-reply@sakmusic.local>')
 
 
 class DevelopmentConfig(Config):

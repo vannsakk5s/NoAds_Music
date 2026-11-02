@@ -138,6 +138,8 @@ const Player = (() => {
         updatePlayPauseUI(true);
         if (els.loadingOverlay) els.loadingOverlay.style.display = 'none';
         if (els.errorBox) els.errorBox.style.display = 'none';
+        const cur = getCurrentSong();
+        if (cur) updateNowPlayingUI(cur);
         savePlayerState(true);
       }
     });
@@ -301,9 +303,24 @@ const Player = (() => {
       });
     }
 
-    // Save playback position immediately before page reload/refresh
+    // Save playback position immediately before page reload/refresh/close/hide
     window.addEventListener('beforeunload', () => {
       savePlayerState(true);
+    });
+    window.addEventListener('pagehide', () => {
+      savePlayerState(true);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        savePlayerState(true);
+      }
+    });
+
+    // Update empty player labels if language changes while no song is playing
+    window.addEventListener('languageChanged', () => {
+      if (currentIndex < 0 || !queue || queue.length === 0) {
+        updateNowPlayingUI(null);
+      }
     });
   }
 
@@ -366,10 +383,11 @@ const Player = (() => {
       if (els.errorBox) els.errorBox.style.display = 'none';
       if (els.autoplayAlert) els.autoplayAlert.style.display = 'none';
       updatePlayPauseUI(true);
+      const song = getCurrentSong();
+      if (song) updateNowPlayingUI(song);
       savePlayerState(true);
 
       // Record listening history once when song actually begins playing
-      const song = getCurrentSong();
       if (song && song.id !== lastRecordedHistorySongId) {
         lastRecordedHistorySongId = song.id;
         API.recordHistory(song.id).catch(() => {});
@@ -969,21 +987,72 @@ const Player = (() => {
 
   function updateNowPlayingUI(song) {
     const title = song ? song.title : 'No song playing';
-    const channel = song ? (song.channel_name || 'YouTube Video') : 'Sak Music';
+    const channel = song ? (song.channel_name || 'YouTube Video') : 'Mayūra.';
     const thumb = song ? (song.thumbnail_url || `https://img.youtube.com/vi/${song.youtube_video_id}/hqdefault.jpg`) : '/static/images/placeholder.svg';
 
-    if (els.nowPlayingTitle) els.nowPlayingTitle.textContent = title;
-    if (els.nowPlayingChannel) els.nowPlayingChannel.textContent = channel;
+    if (els.nowPlayingTitle) {
+      if (song) {
+        els.nowPlayingTitle.removeAttribute('data-i18n');
+        els.nowPlayingTitle.textContent = title;
+      } else {
+        els.nowPlayingTitle.setAttribute('data-i18n', 'no_song_playing');
+        els.nowPlayingTitle.textContent = (window.I18n ? window.I18n.t('no_song_playing') : 'No song playing');
+      }
+    }
 
-    if (els.miniTitle) els.miniTitle.textContent = title;
-    if (els.miniChannel) els.miniChannel.textContent = channel;
+    if (els.nowPlayingChannel) {
+      if (song) {
+        els.nowPlayingChannel.removeAttribute('data-i18n');
+        els.nowPlayingChannel.textContent = channel;
+      } else {
+        els.nowPlayingChannel.setAttribute('data-i18n', 'sak_player_subtitle');
+        els.nowPlayingChannel.textContent = (window.I18n ? window.I18n.t('sak_player_subtitle') : 'Mayūra. Player');
+      }
+    }
+
+    if (els.miniTitle) {
+      if (song) {
+        els.miniTitle.removeAttribute('data-i18n');
+        els.miniTitle.textContent = title;
+      } else {
+        els.miniTitle.setAttribute('data-i18n', 'not_playing');
+        els.miniTitle.textContent = (window.I18n ? window.I18n.t('not_playing') : 'Not Playing');
+      }
+    }
+
+    if (els.miniChannel) {
+      if (song) {
+        els.miniChannel.removeAttribute('data-i18n');
+        els.miniChannel.textContent = channel;
+      } else {
+        els.miniChannel.textContent = 'Mayūra.';
+      }
+    }
+
     if (els.miniThumb) {
       els.miniThumb.src = thumb;
       els.miniThumb.onerror = () => { els.miniThumb.src = '/static/images/placeholder.svg'; };
     }
 
-    if (els.mobileMiniTitle) els.mobileMiniTitle.textContent = title;
-    if (els.mobileMiniChannel) els.mobileMiniChannel.textContent = channel;
+    if (els.mobileMiniTitle) {
+      if (song) {
+        els.mobileMiniTitle.removeAttribute('data-i18n');
+        els.mobileMiniTitle.textContent = title;
+      } else {
+        els.mobileMiniTitle.setAttribute('data-i18n', 'not_playing');
+        els.mobileMiniTitle.textContent = (window.I18n ? window.I18n.t('not_playing') : 'Not Playing');
+      }
+    }
+
+    if (els.mobileMiniChannel) {
+      if (song) {
+        els.mobileMiniChannel.removeAttribute('data-i18n');
+        els.mobileMiniChannel.textContent = channel;
+      } else {
+        els.mobileMiniChannel.textContent = 'Mayūra.';
+      }
+    }
+
     if (els.mobileMiniThumb) {
       els.mobileMiniThumb.src = thumb;
       els.mobileMiniThumb.onerror = () => { els.mobileMiniThumb.src = '/static/images/placeholder.svg'; };
@@ -1000,9 +1069,9 @@ const Player = (() => {
 
     // Update webpage title
     if (song && song.title) {
-      document.title = `${song.title} • Sak Music`;
+      document.title = `${song.title} • Mayūra.`;
     } else {
-      document.title = 'Sak Music • Dashboard & Player';
+      document.title = 'Mayūra. • Dashboard & Player';
     }
 
     // Update system lock screen & notification media player (iOS Control Center, Android, macOS)
@@ -1102,9 +1171,9 @@ const Player = (() => {
 
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: song.title || 'Sak Music',
-        artist: song.channel_name || 'Sak Music',
-        album: 'Sak Music Library',
+        title: song.title || 'Mayūra.',
+        artist: song.channel_name || 'Mayūra.',
+        album: 'Mayūra. Library',
         artwork: artwork
       });
       navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
@@ -1273,6 +1342,7 @@ const Player = (() => {
 
       updateNowPlayingUI(song);
       updateQueueUI();
+      updatePlayPauseUI(wasPlaying);
 
       if (savedTime > 0) {
         if (els.currentTimeLabel) els.currentTimeLabel.textContent = formatTime(savedTime);

@@ -1,5 +1,5 @@
 /**
- * Sak Music - Internationalization (i18n)
+ * Mayūra. - Internationalization (i18n)
  * Supports English (en) and Khmer (km - ភាសាខ្មែរ)
  */
 var I18n = (() => {
@@ -24,7 +24,7 @@ var I18n = (() => {
       add_short: 'Add',
 
       // Dashboard
-      dashboard_badge: 'Sak Music Dashboard',
+      dashboard_badge: 'Mayūra. Dashboard',
       welcome_back: 'Welcome back',
       hero_desc: 'Stream your YouTube catalog in an uncluttered, persistent music dashboard with zero playback disruptions.',
       play_all_songs: 'Play All Songs',
@@ -81,7 +81,7 @@ var I18n = (() => {
       // Player & Queue
       now_playing: 'Now Playing',
       no_song_playing: 'No song playing',
-      sak_player_subtitle: 'Sak Music Player',
+      sak_player_subtitle: 'Mayūra. Player',
       select_song_to_start: 'Select a song to start playback',
       direct_audio: 'Direct Audio',
       upcoming_queue: 'UPCOMING QUEUE',
@@ -151,7 +151,7 @@ var I18n = (() => {
       add_short: 'បន្ថែម',
 
       // Dashboard
-      dashboard_badge: 'ផ្ទាំងគ្រប់គ្រង Sak Music',
+      dashboard_badge: 'ផ្ទាំងគ្រប់គ្រង Mayūra.',
       welcome_back: 'សូមស្វាគមន៍មកវិញ',
       hero_desc: 'ចាក់បទចម្រៀង YouTube របស់អ្នកដោយរលូន គ្មានការរំខាន នៅក្នុងផ្ទាំងគ្រប់គ្រងផ្ទាល់ខ្លួន។',
       play_all_songs: 'ចាក់ចម្រៀងទាំងអស់',
@@ -208,7 +208,7 @@ var I18n = (() => {
       // Player & Queue
       now_playing: 'កំពុងចាក់',
       no_song_playing: 'មិនមានបទកំពុងចាក់',
-      sak_player_subtitle: 'អ្នកចាក់តន្ត្រី Sak',
+      sak_player_subtitle: 'អ្នកចាក់តន្ត្រី Mayūra.',
       select_song_to_start: 'ជ្រើសរើសបទចម្រៀងដើម្បីចាប់ផ្តើមចាក់',
       direct_audio: 'សំឡេងផ្ទាល់',
       upcoming_queue: 'ជួរបទបន្ទាប់',
@@ -423,6 +423,13 @@ var I18n = (() => {
 
     // Translate all elements with data-i18n
     document.querySelectorAll('[data-i18n]').forEach(el => {
+      // Guard: do not overwrite active track metadata with "Not Playing" if a song is loaded
+      const playerTitleIds = ['mini-track-title', 'now-playing-title', 'now-playing-channel', 'mobile-mini-title', 'mobile-mini-channel'];
+      if (playerTitleIds.includes(el.id)) {
+        if (window.Player && typeof window.Player.getCurrentSong === 'function' && window.Player.getCurrentSong()) {
+          return;
+        }
+      }
       const key = el.getAttribute('data-i18n');
       if (dict[key]) {
         el.textContent = dict[key];
