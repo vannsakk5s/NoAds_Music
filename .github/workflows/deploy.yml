@@ -1,0 +1,29 @@
+name: Deploy Flask App to AWS EC2
+
+on:
+  push:
+    branches: [ main ] # ប្ដូរជា master ប្រសិនបើ Branch របស់អ្នកឈ្មោះ master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /var/www/NoAds_Music
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            flask db upgrade
+            sudo systemctl restart noads_music
+            sudo systemctl restart nginx
+            echo "Deployment completed successfully!"
