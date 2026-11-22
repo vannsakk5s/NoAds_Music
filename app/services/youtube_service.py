@@ -288,6 +288,14 @@ def fetch_youtube_playlist_info(url_or_id: str, max_songs: int = 150) -> Dict[st
     }
 
     try:
+        from app.services.audio_service import get_cookie_file_path
+        cookie_file = get_cookie_file_path()
+        if cookie_file:
+            ydl_opts['cookiefile'] = cookie_file
+    except Exception:
+        pass
+
+    try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(canonical_url, download=False)
     except Exception as e:

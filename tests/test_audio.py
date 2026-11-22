@@ -56,3 +56,49 @@ def test_audio_stream_endpoint(client, app):
                     os.remove(path)
                 except PermissionError:
                     pass
+
+
+def test_cookie_file_detection_and_ytdlp_opts(app, monkeypatch):
+    with app.app_context():
+        from app.services.audio_service import get_cookie_file_path, get_ytdlp_base_opts
+        
+        # Test when no cookies file exists
+        opts = get_ytdlp_base_opts()
+        assert 'extractor_args' in opts
+        assert 'tv_samsung' in opts['extractor_args']['youtube']['player_client']
+
+        # Test with instance/cookies.txt mock
+        fake_cookie = os.path.join(app.instance_path, 'cookies.txt')
+        with open(fake_cookie, 'w') as f:
+            f.write("# Netscape HTTP Cookie File\n.youtube.com TRUE / FALSE 1111111111 SID test")
+
+        try:
+            detected = get_cookie_file_path()
+            assert detected == fake_cookie
+            opts_with_cookie = get_ytdlp_base_opts()
+            assert opts_with_cookie.get('cookiefile') == fake_cookie
+        finally:
+            if os.path.exists(fake_cookie):
+                os.remove(fake_cookie)
+
+
+def test_download_bot_error_handling(app, monkeypatch):
+    with app.app_context():
+        from app.services.audio_service import download_youtube_audio
+
+        class FakeYDL:
+            def __init__(self, opts):
+                pass
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+            def download(self, urls):
+                raise Exception("ERROR: [youtube] test_vid: Sign in to confirm you're not a bot.")
+
+        import yt_dlp
+        monkeypatch.setattr(yt_dlp, 'YoutubeDL', FakeYDL)
+
+        res = download_youtube_audio('bot_test_vid')
+        assert res['success'] is False
+        assert "cookies.txt" in res['error']

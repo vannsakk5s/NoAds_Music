@@ -17,6 +17,10 @@ instance/
 *.sqlite
 *.sqlite3
 
+# YouTube Cookies / Authentication
+*cookies.txt
+*.cookie
+
 # Environment variables
 .env
 
