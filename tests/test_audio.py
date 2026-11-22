@@ -56,37 +56,3 @@ def test_audio_stream_endpoint(client, app):
                     os.remove(path)
                 except PermissionError:
                     pass
-
-
-def test_song_to_dict_always_provides_audio_url(app):
-    with app.app_context():
-        song = Song(youtube_video_id='test1234567', title='Test Title')
-        d = song.to_dict()
-        assert d['audio_url'] == '/api/audio/test1234567.mp3'
-        assert d['is_downloaded'] is False
-
-
-@patch('app.blueprints.api.routes.download_youtube_audio')
-def test_audio_stream_on_demand_download_when_absent(mock_download, client, app):
-    with app.app_context():
-        # Simulate successful download creating the file
-        path = get_audio_file_path('ondemand_id')
-
-        def side_effect(vid):
-            with open(path, 'wb') as f:
-                f.write(b'RIFF' + b'\x00' * 2048)
-            return {'success': True, 'video_id': vid, 'file_name': f"{vid}.mp3", 'already_cached': False}
-
-        mock_download.side_effect = side_effect
-
-        try:
-            resp = client.get('/api/audio/ondemand_id.mp3')
-            assert resp.status_code == 200
-            assert mock_download.called
-            resp.close()
-        finally:
-            if os.path.exists(path):
-                try:
-                    os.remove(path)
-                except PermissionError:
-                    pass

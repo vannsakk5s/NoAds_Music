@@ -31,7 +31,7 @@ class Song(db.Model):
             'title': self.title,
             'channel_name': self.channel_name or '',
             'thumbnail_url': self.thumbnail_url or f"https://img.youtube.com/vi/{self.youtube_video_id}/hqdefault.jpg",
-            'audio_url': f"/api/audio/{self.youtube_video_id}.mp3",
+            'audio_url': f"/api/audio/{self.youtube_video_id}.mp3" if downloaded else None,
             'is_downloaded': downloaded,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
