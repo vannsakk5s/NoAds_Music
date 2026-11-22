@@ -40,6 +40,34 @@ const Player = (() => {
   // History tracking state to prevent spamming
   let lastRecordedHistorySongId = null;
 
+  // Screen Wake Lock for mobile/desktop active playback
+  let wakeLock = null;
+
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.innerWidth <= 768);
+  }
+
+  async function requestWakeLock() {
+    if ('wakeLock' in navigator && !wakeLock) {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {
+          wakeLock = null;
+        });
+      } catch (err) {}
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      try {
+        wakeLock.release();
+      } catch (e) {}
+      wakeLock = null;
+    }
+  }
+
   // DOM Elements
   let els = {};
 
@@ -129,6 +157,11 @@ const Player = (() => {
       document.body.appendChild(html5Audio);
     }
 
+    // Configure essential mobile browser background playback attributes
+    html5Audio.setAttribute('playsinline', '');
+    html5Audio.setAttribute('webkit-playsinline', '');
+    html5Audio.preload = 'auto';
+
     html5Audio.volume = savedVolume / 100;
     html5Audio.muted = isMuted;
 
@@ -141,6 +174,7 @@ const Player = (() => {
         const cur = getCurrentSong();
         if (cur) updateNowPlayingUI(cur);
         savePlayerState(true);
+        requestWakeLock();
       }
     });
 
@@ -149,6 +183,28 @@ const Player = (() => {
         isPlaying = false;
         updatePlayPauseUI(false);
         savePlayerState(true);
+        releaseWakeLock();
+      }
+    });
+
+    html5Audio.addEventListener('waiting', () => {
+      if (activeEngine === 'audio' && isPlaying) {
+        if (els.loadingOverlay) {
+          els.loadingOverlay.style.display = 'flex';
+          if (els.loadingText) els.loadingText.textContent = 'Buffering audio...';
+        }
+      }
+    });
+
+    html5Audio.addEventListener('playing', () => {
+      if (activeEngine === 'audio') {
+        if (els.loadingOverlay) els.loadingOverlay.style.display = 'none';
+      }
+    });
+
+    html5Audio.addEventListener('canplay', () => {
+      if (activeEngine === 'audio' && isPlaying) {
+        if (els.loadingOverlay) els.loadingOverlay.style.display = 'none';
       }
     });
 
@@ -156,6 +212,7 @@ const Player = (() => {
       if (activeEngine === 'audio') {
         isPlaying = false;
         updatePlayPauseUI(false);
+        releaseWakeLock();
         handleTrackEnded();
       }
     });
@@ -313,6 +370,18 @@ const Player = (() => {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
         savePlayerState(true);
+        // Mobile background playback fix:
+        // If music was playing via YouTube iframe and user leaves the webpage or locks phone,
+        // YouTube iframe will be paused by the mobile OS. Seamlessly hand off to HTML5 audio!
+        if (isPlaying && activeEngine === 'yt') {
+          const curSong = getCurrentSong();
+          if (curSong) {
+            const curTime = getCurrentTime();
+            playAudioDirect(curSong, curTime, true);
+          }
+        }
+      } else if (document.visibilityState === 'visible' && isPlaying) {
+        requestWakeLock();
       }
     });
 
@@ -477,6 +546,20 @@ const Player = (() => {
     }
   }
 
+  function prefetchNextQueueSong() {
+    if (currentIndex >= 0 && currentIndex < queue.length - 1) {
+      const nextSong = queue[currentIndex + 1];
+      if (nextSong && !nextSong.is_downloaded && nextSong.id) {
+        API.downloadSongAudio(nextSong.id).then((res) => {
+          if (res && res.song) {
+            nextSong.audio_url = res.song.audio_url;
+            nextSong.is_downloaded = true;
+          }
+        }).catch(() => {});
+      }
+    }
+  }
+
   function loadAndPlayCurrent(startSeconds = 0, autoPlay = true) {
     const song = getCurrentSong();
     if (!song) return;
@@ -484,8 +567,8 @@ const Player = (() => {
     updateNowPlayingUI(song);
     updateQueueUI();
 
-    // Check if song has downloaded local audio
-    if (song.audio_url || song.is_downloaded) {
+    // Prefer high-fidelity direct HTML5 audio for mobile background playback and smooth experience
+    if (song.audio_url || song.is_downloaded || isMobileDevice()) {
       playAudioDirect(song, startSeconds, autoPlay);
     } else {
       playYouTube(song, startSeconds, autoPlay);
@@ -514,8 +597,10 @@ const Player = (() => {
 
     // Setup Audio source
     const audioSrc = song.audio_url || `/api/audio/${song.youtube_video_id}.mp3`;
-    if (html5Audio.src !== audioSrc && !html5Audio.src.endsWith(audioSrc)) {
+    const isDifferentSrc = !html5Audio.src || !html5Audio.src.endsWith(audioSrc);
+    if (isDifferentSrc) {
       html5Audio.src = audioSrc;
+      html5Audio.load();
     }
 
     const setAudioTime = () => {
@@ -532,7 +617,7 @@ const Player = (() => {
       } else {
         html5Audio.addEventListener('loadedmetadata', setAudioTime, { once: true });
       }
-    } else {
+    } else if (isDifferentSrc) {
       html5Audio.currentTime = 0;
     }
 
@@ -547,12 +632,16 @@ const Player = (() => {
           consecutiveErrors = 0;
           updatePlayPauseUI(true);
           savePlayerState(true);
+          requestWakeLock();
 
           // Record history
           if (song.id !== lastRecordedHistorySongId) {
             lastRecordedHistorySongId = song.id;
             API.recordHistory(song.id).catch(() => {});
           }
+
+          // Proactively prefetch next track for seamless gapless playback on locked screens
+          prefetchNextQueueSong();
         }).catch((err) => {
           console.warn('Autoplay prevented on HTML5 audio:', err);
           if (els.autoplayAlert) els.autoplayAlert.style.display = 'flex';

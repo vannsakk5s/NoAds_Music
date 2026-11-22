@@ -1,8 +1,20 @@
 import os
 import logging
+import threading
 from flask import current_app
 
 logger = logging.getLogger(__name__)
+
+_locks_guard = threading.Lock()
+_video_locks = {}
+
+
+def _get_video_lock(video_id: str) -> threading.Lock:
+    """Returns a re-entrant lock specific to a video_id to prevent redundant concurrent downloads."""
+    with _locks_guard:
+        if video_id not in _video_locks:
+            _video_locks[video_id] = threading.Lock()
+        return _video_locks[video_id]
 
 
 def get_audio_dir() -> str:
@@ -26,6 +38,7 @@ def is_audio_downloaded(video_id: str) -> bool:
 def download_youtube_audio(video_id: str) -> dict:
     """
     Downloads the audio stream for a YouTube video using yt-dlp and extracts it to MP3.
+    Thread-safe to prevent multiple parallel downloads of the same track.
     Returns a dictionary with status, video_id, and filename.
     """
     if is_audio_downloaded(video_id):
@@ -36,49 +49,60 @@ def download_youtube_audio(video_id: str) -> dict:
             'already_cached': True
         }
 
-    try:
-        import yt_dlp
-    except ImportError:
-        logger.error("yt-dlp is not installed in the Python environment.")
-        return {'success': False, 'error': 'yt-dlp is not installed on the server.'}
-
-    audio_dir = get_audio_dir()
-    output_template = os.path.join(audio_dir, f"{video_id}.%(ext)s")
-
-    ydl_opts = {
-        'format': 'ba[ext=m4a]/ba/best',
-        'outtmpl': output_template,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'quiet': True,
-        'no_warnings': True,
-        'nocheckcertificate': True,
-    }
-
-    url = f"https://www.youtube.com/watch?v={video_id}"
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-
+    lock = _get_video_lock(video_id)
+    with lock:
+        # Re-check in case another thread just completed the download
         if is_audio_downloaded(video_id):
             return {
                 'success': True,
                 'video_id': video_id,
                 'file_name': f"{video_id}.mp3",
-                'already_cached': False
+                'already_cached': True
             }
-        else:
+
+        try:
+            import yt_dlp
+        except ImportError:
+            logger.error("yt-dlp is not installed in the Python environment.")
+            return {'success': False, 'error': 'yt-dlp is not installed on the server.'}
+
+        audio_dir = get_audio_dir()
+        output_template = os.path.join(audio_dir, f"{video_id}.%(ext)s")
+
+        ydl_opts = {
+            'format': 'ba[ext=m4a]/ba/best',
+            'outtmpl': output_template,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'quiet': True,
+            'no_warnings': True,
+            'nocheckcertificate': True,
+        }
+
+        url = f"https://www.youtube.com/watch?v={video_id}"
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+
+            if is_audio_downloaded(video_id):
+                return {
+                    'success': True,
+                    'video_id': video_id,
+                    'file_name': f"{video_id}.mp3",
+                    'already_cached': False
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'Download finished but audio file was not created.'
+                }
+        except Exception as e:
+            logger.error(f"Error downloading audio for video {video_id}: {e}")
             return {
                 'success': False,
-                'error': 'Download finished but audio file was not created.'
+                'error': str(e)
             }
-    except Exception as e:
-        logger.error(f"Error downloading audio for video {video_id}: {e}")
-        return {
-            'success': False,
-            'error': str(e)
-        }

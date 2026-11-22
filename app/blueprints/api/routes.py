@@ -487,9 +487,19 @@ def record_history():
 def stream_audio(filename):
     """
     Serves downloaded audio with HTTP Range support for seamless browser seeking.
+    If the audio file is not yet cached on the server, downloads it on-demand before serving.
     """
     clean_name = os.path.basename(filename)
     audio_dir = get_audio_dir()
+    file_path = os.path.join(audio_dir, clean_name)
+
+    if not os.path.isfile(file_path):
+        video_id, ext = os.path.splitext(clean_name)
+        if ext.lower() == '.mp3' and len(video_id) >= 5:
+            res = download_youtube_audio(video_id)
+            if not res.get('success'):
+                return jsonify({'error': res.get('error', 'Audio file not found or download failed.')}), 404
+
     return send_from_directory(audio_dir, clean_name, conditional=True, mimetype='audio/mpeg')
 
 
