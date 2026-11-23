@@ -6,6 +6,11 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{% block title %}Mayūra.{% endblock %}</title>
 
+  <!-- Favicon & App Icons -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo-icon.png') }}">
+
   <!-- Prevent Theme & Language Flicker (Immediate Initializer) -->
   <script>
     (function() {

@@ -23,12 +23,8 @@
     <div class="p-5 flex items-center justify-between border-b border-white/5">
       <div class="flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-xl bg-gradient-to-br from-mint-500 via-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-glow-mint-sm">
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
-            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
+          class="brand-logo-container w-10 h-10 rounded-xl bg-dark-800/80 border border-white/10 flex items-center justify-center p-1 shadow-glow-mint-sm flex-shrink-0">
+          <img src="{{ url_for('static', filename='images/logo-icon.png') }}" alt="Mayūra Logo" class="w-full h-full object-contain">
         </div>
         <div>
           <span class="font-display font-bold text-lg text-white tracking-tight block">Mayūra.</span>

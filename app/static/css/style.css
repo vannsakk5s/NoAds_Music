@@ -747,6 +747,13 @@ html.light .nav-item.active {
   color: #059669 !important;
   border-color: rgba(16, 185, 129, 0.4) !important;
 }
+html:not(.dark) .brand-logo-container,
+html.light .brand-logo-container {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
 html:not(.dark) .playlist-icon-box,
 html.light .playlist-icon-box {
   background-color: #ecfdf5 !important;
